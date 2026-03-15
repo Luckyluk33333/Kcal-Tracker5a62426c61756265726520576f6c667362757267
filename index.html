@@ -78,12 +78,12 @@
         .btn-delete:active { color: var(--rose-400); background: rgba(251, 113, 133, 0.1); }
         .empty-state { text-align: center; padding: 40px 20px; background: var(--bg-900); border: 1px dashed var(--border-800); border-radius: 16px; color: var(--text-500); font-size: 14px;}
         
-        /* NEU: Gamification Styles */
+        /* Gamification Styles */
         .progress-container { width: 100%; height: 8px; background: var(--bg-950); border-radius: 4px; margin-top: 16px; overflow: hidden; border: 1px solid var(--border-800); }
         .progress-fill { height: 100%; background: var(--emerald-500); width: 0%; transition: width 0.5s ease-out; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
         .progress-text { font-size: 11px; color: var(--text-500); margin-top: 6px; display: flex; justify-content: space-between; font-weight: 500; }
 
-        /* NEU: Wochen-Checkliste Styles */
+        /* Wochen-Checkliste Styles */
         .checklist-card { background: var(--bg-900); border: 1px solid var(--border-800); border-radius: 16px; padding: 20px; margin-top: 16px; }
         .checklist-grid { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 0 8px; }
         .checklist-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -146,12 +146,12 @@
                     <span id="stat-kw-kg">~ 0.00 kg Fett</span>
                 </div>
 
-                <!-- NEU: Fortschrittsbalken -->
+                <!-- Fortschrittsbalken -->
                 <div class="progress-container">
                     <div id="kw-progress-fill" class="progress-fill"></div>
                 </div>
                 <div class="progress-text">
-                    <span>Ziel: 3.500 kcal</span>
+                    <span>Ziel: -3.500 kcal</span>
                     <span id="kw-progress-text">0%</span>
                 </div>
             </div>
@@ -191,7 +191,7 @@
 
         </div>
 
-        <!-- NEU: Wochen-Checkliste -->
+        <!-- Wochen-Checkliste -->
         <div class="checklist-card">
             <h2 class="form-title" style="margin-bottom: 4px;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--orange-500);"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -239,7 +239,7 @@
             </div>
         </div>
 
-        <!-- NEU: Backup Bereich -->
+        <!-- Backup Bereich -->
         <div class="form-card" style="margin-top: 24px; margin-bottom: 24px;">
             <h2 class="form-title" style="font-size: 16px;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--emerald-400);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
@@ -266,7 +266,7 @@
             return new Date(dateObj.getTime() - tzOffset).toISOString().split('T')[0];
         }
 
-        // --- NEU: Sicherer Speicher-Zugriff (verhindert iOS Absturz) ---
+        // Sicherer Speicher-Zugriff
         function saveToStorage(data) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -282,7 +282,6 @@
                 return [];
             }
         }
-        // -----------------------------------------------------------------
 
         const form = document.getElementById('entry-form');
         const inputDate = document.getElementById('input-date');
@@ -298,7 +297,6 @@
         const statMonth = document.getElementById('stat-month');
         const statMonthKg = document.getElementById('stat-month-kg');
 
-        // NEU: Gamification Elemente im DOM abgreifen
         const kwProgressFill = document.getElementById('kw-progress-fill');
         const kwProgressText = document.getElementById('kw-progress-text');
 
@@ -333,7 +331,7 @@
                 if (entry.date.startsWith(currentMonthPrefix) && entry.date <= todayStr) monthDeficit += deficit;
             });
 
-            // --- NEU: Fortschrittsbalken berechnen ---
+            // Fortschrittsbalken berechnen
             const targetKcal = 3500;
             let progressPercent = 0;
             if (kwDeficit > 0) {
@@ -341,7 +339,6 @@
             }
             kwProgressFill.style.width = progressPercent + '%';
             
-            // "Party-Modus" bei 100%
             if (progressPercent >= 100) {
                 kwProgressFill.style.background = 'linear-gradient(90deg, #3b82f6, #10b981, #f97316)';
                 kwProgressText.innerText = 'Ziel erreicht! 🎉';
@@ -366,13 +363,11 @@
             renderHistory();
         }
 
-        // --- NEU: Checkliste rendern ---
         function renderChecklist() {
             const checklistContainer = document.getElementById('checklist-container');
             const todayObj = new Date();
             const todayStr = getLocalDateString(todayObj);
             
-            // Montag der aktuellen Woche berechnen
             const dayOfWeek = todayObj.getDay() || 7; 
             const mondayObj = new Date(todayObj);
             mondayObj.setDate(todayObj.getDate() - dayOfWeek + 1);
@@ -388,25 +383,21 @@
                 const entry = entries.find(e => e.date === dateStr);
                 
                 let iconClass = 'icon-empty';
-                let svgContent = '<circle cx="12" cy="12" r="10"/>'; // Standard: leerer Kreis
+                let svgContent = '<circle cx="12" cy="12" r="10"/>'; 
                 
                 if (entry) {
                     if (entry.consumed < 1900) {
-                        // Grün: Unter 1900 kcal
                         iconClass = 'icon-green';
                         svgContent = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
                     } else if (entry.consumed > 2450) {
-                        // Rot: Über 2450 kcal
                         iconClass = 'icon-red';
                         svgContent = '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
                     } else {
-                        // Orange: 1900 - 2450 kcal
                         iconClass = 'icon-orange';
                         svgContent = '<circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/>';
                     }
                 }
 
-                // Heutigen Tag farblich etwas hervorheben
                 const isToday = dateStr === todayStr;
                 const dayColor = isToday ? 'color: var(--text-100); font-weight: bold;' : '';
 
@@ -422,6 +413,7 @@
             checklistContainer.innerHTML = html;
         }
 
+        // ANGEPASST: Vorzeichen für die Anzeige umkehren
         function updateStatDisplay(element, value, showZero = true) {
             element.className = 'stat-val'; // Reset
             if (value === null && !showZero) {
@@ -429,7 +421,14 @@
                 element.classList.add('text-gray');
             } else {
                 const displayVal = value || 0;
-                element.innerText = (displayVal > 0 ? '+' : '') + displayVal;
+                
+                // Vorzeichen umkehren: Defizit (positiv) wird zu minus, Überschuss (negativ) wird zu plus
+                const visualVal = -displayVal;
+                
+                // Text setzen (ein evtl. Minus kommt von 'visualVal' automatisch mit)
+                element.innerText = (visualVal > 0 ? '+' : '') + visualVal;
+                
+                // Farben bleiben auf der echten Logik basierend (Defizit = grün, Überschuss = rot)
                 if (displayVal > 0) element.classList.add('text-emerald');
                 else if (displayVal < 0) element.classList.add('text-rose');
                 else element.classList.add('text-gray');
@@ -442,6 +441,7 @@
             return 'text-gray';
         }
 
+        // ANGEPASST: Vorzeichen in der Historie ebenfalls umkehren
         function renderHistory() {
             if (entries.length === 0) {
                 historyContainer.innerHTML = `
@@ -455,7 +455,10 @@
                 const deficit = entry.targetBurn - entry.consumed;
                 const dateParts = entry.date.split('-');
                 const displayDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
-                const sign = deficit > 0 ? '+' : '';
+                
+                // Vorzeichen für die Historien-Anzeige umkehren
+                const visualDeficit = -deficit;
+                const sign = visualDeficit > 0 ? '+' : '';
 
                 return `
                 <div class="history-item">
@@ -470,7 +473,7 @@
                     <div class="hi-right">
                         <div>
                             <span class="hi-val ${getDeficitColorClass(deficit)}">
-                                ${sign}${deficit} kcal
+                                ${sign}${visualDeficit} kcal
                             </span>
                         </div>
                         <button onclick="deleteEntry('${entry.date}')" class="btn-delete" title="Eintrag löschen">
@@ -502,7 +505,6 @@
             updateApp();
         };
 
-        // --- NEU: Backup Funktionen ---
         window.exportData = function() {
             if (entries.length === 0) {
                 const btn = document.getElementById('btn-export');
@@ -510,14 +512,12 @@
                 setTimeout(() => btn.innerText = "💾 Backup speichern", 2000);
                 return;
             }
-            // Erzeugt eine JSON Datei mit deinen Daten
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "kalorien_backup.json");
             dlAnchorElem.click();
 
-            // Feedback für den Nutzer
             const btn = document.getElementById('btn-export');
             btn.innerText = "✅ Gespeichert!";
             setTimeout(() => btn.innerText = "💾 Backup speichern", 2000);
@@ -536,7 +536,6 @@
                         saveToStorage(entries);
                         updateApp();
                         
-                        // Feedback für den Nutzer
                         const btn = document.getElementById('btn-import');
                         btn.innerText = "✅ Geladen!";
                         setTimeout(() => btn.innerText = "📂 Backup laden", 2000);
@@ -550,7 +549,6 @@
                         btn.style.color = "var(--text-300)";
                     }, 3000);
                 }
-                // Input zurücksetzen, damit die gleiche Datei nochmal gewählt werden kann
                 e.target.value = '';
             };
             reader.readAsText(file);
