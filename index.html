@@ -20,18 +20,43 @@
             --rose-400: #fb7185;
             --orange-500: #f97316;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background-color: var(--bg-950); color: var(--text-100); padding: 16px; -webkit-tap-highlight-color: transparent; line-height: 1.5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { 
+            background-color: var(--bg-950); 
+            color: var(--text-100); 
+            padding: 16px; 
+            -webkit-tap-highlight-color: transparent; 
+            line-height: 1.5; 
+        }
         .container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
+        header { margin-bottom: 10px; }
         h1 { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: white; }
         .subtitle { color: var(--text-500); font-size: 13px; margin-top: 2px; }
         
         .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
         @media (min-width: 600px) { .grid { grid-template-columns: 1fr 1fr; } }
         
-        .card { background: var(--bg-900); border: 1px solid var(--border-800); border-radius: 20px; padding: 20px; position: relative; overflow: hidden; }
-        .card-title { display: flex; align-items: center; gap: 8px; color: var(--text-400); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+        .card { 
+            background: var(--bg-900); 
+            border: 1px solid var(--border-800); 
+            border-radius: 20px; 
+            padding: 20px; 
+            position: relative; 
+            overflow: hidden; 
+            transition: transform 0.2s ease;
+        }
+        .card-title { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            color: var(--text-400); 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            margin-bottom: 12px; 
+        }
         .stat-val { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; }
         .stat-unit { color: var(--text-500); margin-left: 4px; font-size: 16px; font-weight: 400; }
         .stat-sub { color: var(--text-500); font-size: 12px; margin-top: 6px; display: block; }
@@ -45,7 +70,7 @@
         @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr 1fr auto; align-items: flex-end; } }
         .input-group { display: flex; flex-direction: column; gap: 8px; }
         label { font-size: 12px; color: var(--text-400); font-weight: 600; padding-left: 4px; }
-        input { background: var(--bg-950); border: 1px solid var(--border-800); border-radius: 12px; padding: 14px; color: white; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input { background: var(--bg-950); border: 1px solid var(--border-800); border-radius: 12px; padding: 14px; color: white; font-size: 16px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
         input:focus { border-color: var(--blue-500); }
         button { background: var(--blue-600); color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         button:active { transform: scale(0.98); opacity: 0.9; }
@@ -65,19 +90,56 @@
         .chart-bar { width: 100%; border-radius: 2px; min-height: 2px; }
         .bar-pos { background: var(--emerald-500); }
         .bar-neg { background: var(--rose-400); }
-        .chart-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--text-500); }
-        .zero-line { position: absolute; width: 100%; height: 1px; background: var(--border-800); bottom: 20px; }
+        .chart-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--text-500); text-align: center; width: 100%; overflow: hidden; white-space: nowrap; }
+        .zero-line { position: absolute; width: 100%; height: 1px; background: var(--border-800); bottom: 20px; z-index: 0; }
 
-        .history-item { background: var(--bg-900); border: 1px solid var(--border-800); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .hi-date { font-size: 13px; font-weight: 600; color: var(--text-400); font-family: monospace; }
+        /* History Collapsible Styles */
+        .history-section { background: var(--bg-900); border: 1px solid var(--border-800); border-radius: 20px; overflow: hidden; }
+        .history-header { 
+            padding: 20px; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .history-header:hover { background: rgba(255,255,255,0.02); }
+        .history-header h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-400); }
+        .chevron { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: var(--text-500); }
+        .history-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 20px;
+        }
+        .history-content.open { max-height: 2000px; padding-bottom: 20px; }
+        .chevron.open { transform: rotate(180deg); }
+
+        .history-item { 
+            background: var(--bg-950); 
+            border: 1px solid var(--border-800); 
+            border-radius: 16px; 
+            padding: 14px 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 8px; 
+        }
+        .hi-date { font-size: 13px; font-weight: 600; color: var(--text-400); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
         .hi-kcal { font-size: 14px; font-weight: 500; }
         .hi-def { font-weight: 800; font-size: 15px; }
-        .btn-del { background: transparent; color: var(--text-500); font-size: 18px; padding: 4px; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-del { background: transparent; color: var(--text-500); font-size: 18px; padding: 4px; border-radius: 6px; border: none; cursor: pointer; transition: color 0.2s; }
+        .btn-del:hover { color: var(--rose-400); }
 
         .text-emerald { color: var(--emerald-500); }
         .text-rose { color: var(--rose-400); }
         .text-orange { color: var(--orange-500); }
         .text-gray { color: var(--text-400); }
+        
+        .footer-btns { display: flex; gap: 10px; margin-bottom: 40px; margin-top: 10px; }
+        .footer-btn { flex: 1; background: var(--bg-900); border: 1px solid var(--border-800); font-size: 13px; color: white; padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+        .footer-btn:hover { background: var(--border-800); }
     </style>
 </head>
 <body>
@@ -85,10 +147,8 @@
     <div class="container">
         
         <header>
-            <div>
-                <h1>Defizit Tracker PRO</h1>
-                <p class="subtitle">Ziel: -0,5 kg Körperfett pro Woche (3.500 kcal)</p>
-            </div>
+            <h1>Defizit Tracker PRO</h1>
+            <p class="subtitle">Ziel: -0,5 kg Körperfett pro Woche (3.500 kcal Defizit)</p>
         </header>
 
         <div class="grid">
@@ -97,9 +157,9 @@
                 <div class="card-title">Samstags-Puffer (Basis: So-Fr)</div>
                 <div class="stat-row">
                     <span id="puffer-val" class="stat-val text-orange">---</span>
-                    <span class="stat-unit">kcal</span>
+                    <span id="puffer-unit" class="stat-unit">kcal</span>
                 </div>
-                <span id="puffer-sub" class="stat-sub">Erlaubte Kalorien für Samstag</span>
+                <span id="puffer-sub" class="stat-sub">Budget für den nächsten Samstag</span>
                 <p id="puffer-info" style="font-size: 11px; color: var(--text-500); margin-top: 8px;">Woche wird berechnet...</p>
             </div>
 
@@ -146,11 +206,22 @@
             <div id="checklist" class="checklist-grid"></div>
         </div>
 
-        <!-- Trend Chart -->
-        <div class="trend-card">
-            <div class="card-title">Monatlicher Trend (Tägl. Defizit)</div>
-            <div id="chart" class="chart-area">
-                <div class="zero-line"></div>
+        <!-- Trend Charts Grid -->
+        <div class="grid">
+            <!-- Monatlicher Trend -->
+            <div class="trend-card">
+                <div class="card-title">Monatlicher Trend (Tägl. Defizit)</div>
+                <div id="chart" class="chart-area">
+                    <div class="zero-line"></div>
+                </div>
+            </div>
+
+            <!-- Jahres-Übersicht -->
+            <div class="trend-card">
+                <div class="card-title">Jahres-Übersicht (Monatl. Summe)</div>
+                <div id="yearly-chart" class="chart-area">
+                    <div class="zero-line"></div>
+                </div>
             </div>
         </div>
 
@@ -173,24 +244,63 @@
             </form>
         </div>
 
-        <!-- History -->
-        <div id="history-list"></div>
+        <!-- Collapsible History -->
+        <div class="history-section">
+            <div class="history-header" onclick="toggleHistory()">
+                <h2>Verlauf der Einträge</h2>
+                <svg class="chevron" id="history-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div id="history-list" class="history-content">
+                <!-- Einträge werden hier gerendert -->
+            </div>
+        </div>
 
         <!-- Backup -->
-        <div style="display: flex; gap: 10px; margin-bottom: 40px;">
-            <button onclick="exportJSON()" style="flex: 1; background: var(--bg-900); border: 1px solid var(--border-800); font-size: 13px; color: white; padding: 12px; border-radius: 12px; cursor: pointer;">💾 Backup speichern</button>
+        <div class="footer-btns">
+            <button onclick="exportJSON()" class="footer-btn">💾 Backup speichern</button>
             <input type="file" id="file-in" style="display:none" accept=".json">
-            <button onclick="document.getElementById('file-in').click()" style="flex: 1; background: var(--bg-900); border: 1px solid var(--border-800); font-size: 13px; color: white; padding: 12px; border-radius: 12px; cursor: pointer;">📂 Backup laden</button>
+            <button onclick="document.getElementById('file-in').click()" class="footer-btn">📂 Backup laden</button>
         </div>
     </div>
 
     <script>
         const KEY = 'fitness_tracker_v3';
         const TARGET_WEEKLY_DEFICIT = 3500; 
+        const DAILY_GOAL_MAX = 1900; 
+        const DAILY_BURN_DEFAULT = 2450;
 
         let data = JSON.parse(localStorage.getItem(KEY) || '[]');
+        let isHistoryOpen = false;
 
         function getISO(d) { return d.toISOString().split('T')[0]; }
+
+        function getMondayOfDate(d) {
+            const date = new Date(d);
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(date.setDate(diff));
+        }
+
+        function getSundayOfDate(d) {
+            const date = new Date(d);
+            const day = date.getDay();
+            const diff = date.getDate() - day;
+            return new Date(date.setDate(diff));
+        }
+
+        function toggleHistory() {
+            isHistoryOpen = !isHistoryOpen;
+            const content = document.getElementById('history-list');
+            const chevron = document.getElementById('history-chevron');
+            
+            if (isHistoryOpen) {
+                content.classList.add('open');
+                chevron.classList.add('open');
+            } else {
+                content.classList.remove('open');
+                chevron.classList.remove('open');
+            }
+        }
 
         function update() {
             data.sort((a, b) => b.date.localeCompare(a.date));
@@ -199,21 +309,16 @@
             const now = new Date();
             const todayStr = getISO(now);
 
-            // 1. Wochen-Werte (Mo-So)
-            const dayIdx = (now.getDay() + 6) % 7; 
-            const mon = new Date(now); mon.setDate(now.getDate() - dayIdx);
+            const mon = getMondayOfDate(now);
             const monStr = getISO(mon);
 
-            // 2. Samstags-Puffer (Basis So-Fr)
-            const sunIdx = now.getDay(); 
-            const sun = new Date(now); sun.setDate(now.getDate() - sunIdx);
+            const sun = getSundayOfDate(now);
             const sunStr = getISO(sun);
             const fri = new Date(sun); fri.setDate(sun.getDate() + 5);
             const friStr = getISO(fri);
             const sat = new Date(sun); sat.setDate(sun.getDate() + 6);
             const satStr = getISO(sat);
 
-            // 3. Rollierend 7 Tage
             const sevenDaysAgo = new Date(now);
             sevenDaysAgo.setDate(now.getDate() - 6);
             const sevenDaysAgoStr = getISO(sevenDaysAgo);
@@ -223,6 +328,7 @@
             let monthDeficit = 0;
             let rollDeficit = 0;
             const monthPrefix = todayStr.substring(0, 7);
+            const yearPrefix = todayStr.substring(0, 4);
 
             data.forEach(e => {
                 const def = e.targetBurn - e.consumed;
@@ -232,22 +338,30 @@
                 if (e.date >= sevenDaysAgoStr && e.date <= todayStr) rollDeficit += def;
             });
 
-            // Samstags Puffer Rechnung
-            // Ziel ist 3500 Defizit am Ende von Samstag.
-            // Erlaubte Kalorien am Sa = Heutiger Verbrauch (Garmin) - (3500 - Defizit So-Fr)
-            // Wir nehmen den Durchschnittsverbrauch falls für Samstag noch kein Eintrag da ist.
             const currentSatEntry = data.find(e => e.date === satStr);
-            const satBurn = currentSatEntry ? currentSatEntry.targetBurn : 2450;
+            const satBurn = currentSatEntry ? currentSatEntry.targetBurn : DAILY_BURN_DEFAULT;
             const neededForSat = TARGET_WEEKLY_DEFICIT - sunToFriDeficit;
             const satBudget = satBurn - neededForSat;
 
             const pufferEl = document.getElementById('puffer-val');
+            const pufferUnit = document.getElementById('puffer-unit');
+            
             if (todayStr <= satStr) {
-                pufferEl.innerText = Math.round(satBudget);
+                if (sunToFriDeficit <= 0) {
+                    pufferEl.innerText = "kein Puffer angespart";
+                    pufferEl.style.fontSize = "18px";
+                    pufferUnit.style.display = "none";
+                } else {
+                    pufferEl.innerText = Math.round(satBudget);
+                    pufferEl.style.fontSize = "36px";
+                    pufferUnit.style.display = "inline";
+                }
                 document.getElementById('puffer-info').innerText = `So-Fr Defizit bisher: ${sunToFriDeficit} kcal`;
             } else {
                 pufferEl.innerText = "---";
-                document.getElementById('puffer-info').innerText = "Woche beendet. Morgen geht's neu los.";
+                pufferEl.style.fontSize = "36px";
+                pufferUnit.style.display = "inline";
+                document.getElementById('puffer-info').innerText = "Woche beendet. Neuer Zyklus läuft.";
             }
 
             // UI Updates
@@ -265,6 +379,7 @@
 
             renderChecklist(mon);
             renderChart(monthPrefix);
+            renderYearlyChart(yearPrefix);
             renderHistory();
         }
 
@@ -279,8 +394,8 @@
                 let cls = '';
                 let symbol = '•';
                 if(entry) {
-                    if(entry.consumed <= 1900) { cls='dot-green'; symbol='✓'; }
-                    else if(entry.consumed > 2450) { cls='dot-red'; symbol='✕'; }
+                    if(entry.consumed <= DAILY_GOAL_MAX) { cls='dot-green'; symbol='✓'; }
+                    else if(entry.consumed > entry.targetBurn) { cls='dot-red'; symbol='✕'; }
                     else { cls='dot-orange'; symbol='~'; }
                 }
                 html += `<div class="checklist-item">
@@ -322,6 +437,45 @@
             }
         }
 
+        function renderYearlyChart(year) {
+            const chart = document.getElementById('yearly-chart');
+            chart.innerHTML = '<div class="zero-line"></div>';
+            const monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+            
+            const monthlySums = new Array(12).fill(0);
+            const hasData = new Array(12).fill(false);
+
+            data.forEach(e => {
+                if (e.date.startsWith(year)) {
+                    const mIdx = parseInt(e.date.split('-')[1]) - 1;
+                    monthlySums[mIdx] += (e.targetBurn - e.consumed);
+                    hasData[mIdx] = true;
+                }
+            });
+
+            for(let i=0; i<12; i++) {
+                const def = monthlySums[i];
+                const h = Math.min(80, Math.abs(def) / 150);
+                
+                const wrap = document.createElement('div');
+                wrap.className = 'chart-bar-wrap';
+                
+                if (hasData[i] || i <= new Date().getMonth()) {
+                    const bar = document.createElement('div');
+                    bar.className = 'chart-bar ' + (def >= 0 ? 'bar-pos' : 'bar-neg');
+                    bar.style.height = (h + 2) + 'px';
+                    wrap.appendChild(bar);
+                }
+
+                const l = document.createElement('span');
+                l.className = 'chart-label'; 
+                l.innerText = monthNames[i];
+                wrap.appendChild(l);
+                
+                chart.appendChild(wrap);
+            }
+        }
+
         function renderHistory() {
             const container = document.getElementById('history-list');
             container.innerHTML = data.length ? data.map(e => {
@@ -330,7 +484,7 @@
                     <div class="hi-date">${e.date.split('-').reverse().join('.')}</div>
                     <div class="hi-kcal">${e.consumed} <span style="color:var(--text-500)">/ ${e.targetBurn}</span></div>
                     <div class="hi-def ${def >= 0 ? 'text-emerald':'text-rose'}">${def > 0 ? '+':''}${def}</div>
-                    <button class="btn-del" onclick="del('${e.date}')">🗑️</button>
+                    <button class="btn-del" onclick="del('${e.date}'); event.stopPropagation();" title="Löschen">🗑️</button>
                 </div>`;
             }).join('') : '<p style="text-align:center; color:var(--text-500); padding:20px;">Noch keine Einträge.</p>';
         }
@@ -352,15 +506,21 @@
             data.push({date, consumed, targetBurn});
             update();
             document.getElementById('in-kcal').value = '';
+            document.getElementById('in-date').value = getISO(new Date());
         };
 
-        window.del = (date) => { data = data.filter(d => d.date !== date); update(); };
+        window.del = (date) => { 
+            if(confirm('Eintrag für ' + date + ' wirklich löschen?')) {
+                data = data.filter(d => d.date !== date); 
+                update(); 
+            }
+        };
         
         window.exportJSON = () => {
-            const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `kalorien_backup.json`;
+            a.download = `kalorien_backup_${getISO(new Date())}.json`;
             a.click();
         };
 
@@ -371,11 +531,10 @@
             reader.onload = (ev) => {
                 try {
                     const imported = JSON.parse(ev.target.result);
-                    // Unterstützung für beide Formate (kcal/burn vs consumed/targetBurn)
                     data = imported.map(item => ({
                         date: item.date,
                         consumed: item.consumed || item.kcal || 0,
-                        targetBurn: item.targetBurn || item.burn || 2450
+                        targetBurn: item.targetBurn || item.burn || DAILY_BURN_DEFAULT
                     }));
                     update();
                 } catch(err) {
