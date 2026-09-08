@@ -1,658 +1,1116 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalorien-Defizit Tracker PRO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f2f1f6;
-        }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f2f1f6; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #b0b4bb; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0C0C0A">
+<title>Defizit Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   00 — TOKENS
+   ========================================================== */
+:root{
+  --paper:#EDEBE5;
+  --paper-2:#F6F4F0;
+  --paper-3:#E3E0D8;
+  --ink:#131310;
+  --ink-2:#57554D;
+  --ink-3:#8E8B82;
+  --rule:rgba(19,19,16,.16);
+  --rule-soft:rgba(19,19,16,.075);
+  --pos:#146B45;
+  --neg:#C33A18;
+  --acid:#C9F227;
+  --on-acid:#131310;
+  --shift:0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C0C0A; --paper-2:#141412; --paper-3:#1D1D1A;
+    --ink:#F2F0E9; --ink-2:#A6A39A; --ink-3:#6D6A62;
+    --rule:rgba(242,240,233,.18); --rule-soft:rgba(242,240,233,.085);
+    --pos:#B6E82C; --neg:#FF6234; --acid:#C9F227; --on-acid:#131310;
+    --shift:1;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C0C0A; --paper-2:#141412; --paper-3:#1D1D1A;
+  --ink:#F2F0E9; --ink-2:#A6A39A; --ink-3:#6D6A62;
+  --rule:rgba(242,240,233,.18); --rule-soft:rgba(242,240,233,.085);
+  --pos:#B6E82C; --neg:#FF6234; --acid:#C9F227; --on-acid:#131310;
+  --shift:1;
+}
 
-        .card {
-            background: #ffffff;
-            box-shadow: 0 1px 2px rgba(20, 20, 30, 0.03), 0 8px 24px -6px rgba(20, 20, 30, 0.06);
-        }
+*{ box-sizing:border-box; }
+html{ color-scheme:light dark; }
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size:15px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+  padding-bottom:calc(var(--dockh, 150px) + 28px);
+}
+.mono{ font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric:tabular-nums; }
+.num{ font-variant-numeric:tabular-nums; letter-spacing:-.03em; }
+.pos{ color:var(--pos); } .neg{ color:var(--neg); } .zeroc{ color:var(--ink-3); }
+::selection{ background:var(--acid); color:var(--on-acid); }
+@media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms!important; animation-duration:.01ms!important; } }
 
-        .progress-fill { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .chart-zero-line { position: absolute; width: 100%; height: 1px; background: #e8e8ee; top: 50%; transform: translateY(-50%); z-index: 0; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 20px; }
+@media(min-width:800px){ .wrap{ padding:0 40px; } }
 
-        .history-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
-        }
-        .history-content.open { max-height: 2000px; padding-bottom: 20px; }
-        .chevron { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .chevron.open { transform: rotate(180deg); }
-    </style>
+/* ==========================================================
+   01 — MASTHEAD
+   ========================================================== */
+.mast{
+  position:sticky; top:0; z-index:40;
+  background:var(--paper); border-bottom:1px solid var(--rule);
+}
+.mast .wrap{ display:flex; align-items:center; gap:18px; height:60px; }
+.mark{
+  width:26px; height:26px; flex:none; background:var(--ink); color:var(--paper);
+  display:grid; place-items:center; font-size:11px; font-weight:800; letter-spacing:-.04em;
+}
+.wordmark{ font-size:14px; font-weight:700; letter-spacing:-.02em; white-space:nowrap; }
+.wordmark em{ font-style:normal; color:var(--ink-3); font-weight:500; }
+.ticker{ margin-left:auto; display:none; gap:0; align-items:stretch; }
+@media(min-width:800px){ .ticker{ display:flex; } }
+.tick{
+  padding:0 16px; border-left:1px solid var(--rule-soft);
+  display:flex; flex-direction:column; justify-content:center; gap:1px;
+}
+.tick b{ font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); }
+.tick span{ font-size:13px; font-weight:700; }
+.mast .toggle{ margin-left:auto; }
+@media(min-width:800px){ .mast .toggle{ margin-left:16px; } }
+.toggle{
+  flex:none; width:32px; height:32px; border:1px solid var(--rule); background:transparent;
+  color:var(--ink-2); cursor:pointer; display:grid; place-items:center;
+  transition:background .18s, color .18s, border-color .18s;
+}
+.toggle:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+/* ==========================================================
+   02 — SECTION HEADS
+   ========================================================== */
+section{ padding:44px 0 0; }
+section:first-of-type{ padding-top:34px; }
+.sec{ display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.sec .idx{
+  font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700;
+  color:var(--ink-3); letter-spacing:.06em;
+}
+.sec h2{ margin:0; font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; white-space:nowrap; }
+.sec .fill{ flex:1; height:1px; background:var(--rule); }
+.sec .meta{
+  font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3);
+  letter-spacing:.06em; white-space:nowrap;
+}
+
+/* ==========================================================
+   03 — HERO
+   ========================================================== */
+.hero{ display:grid; grid-template-columns:1fr; gap:26px; }
+@media(min-width:900px){ .hero{ grid-template-columns:1.15fr 1fr; gap:52px; align-items:end; } }
+.giant{
+  font-size:clamp(60px, 15vw, 118px); font-weight:800; line-height:.82;
+  letter-spacing:-.055em; font-variant-numeric:tabular-nums;
+  display:block; margin:0;
+}
+.giant sup{ font-size:.26em; font-weight:700; letter-spacing:-.01em; vertical-align:super; margin-left:.1em; color:var(--ink-3); }
+.giant-sub{
+  margin-top:14px; font-family:"JetBrains Mono", monospace; font-size:12px;
+  color:var(--ink-2); letter-spacing:.02em;
+}
+.goalbar{ margin-top:24px; }
+.goalbar .track{ position:relative; height:10px; background:var(--paper-3); overflow:hidden; }
+.goalbar .fill{ position:absolute; inset:0 auto 0 0; width:0; background:var(--ink); transition:width 1s cubic-bezier(.2,.9,.25,1); }
+.goalbar.hit .fill{ background:var(--acid); }
+.goalbar .marks{
+  display:flex; justify-content:space-between; margin-top:7px;
+  font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3); letter-spacing:.04em;
+}
+
+/* week columns */
+.weekgrid{ display:grid; grid-template-columns:repeat(7,1fr); border-top:1px solid var(--rule); }
+.wcol{ border-right:1px solid var(--rule-soft); padding:10px 0 0; text-align:center; }
+.wcol:last-child{ border-right:0; }
+.wcol.now{ background:var(--paper-2); }
+.wcol .wd{ font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--ink-3); }
+.wcol.now .wd{ color:var(--ink); }
+.gauge{ position:relative; height:74px; margin:9px 0 8px; }
+.gauge .axis{ position:absolute; left:12%; right:12%; top:50%; height:1px; background:var(--rule-soft); }
+.gauge i{
+  position:absolute; left:26%; right:26%; height:0;
+  background:var(--ink-3); transition:height .8s cubic-bezier(.2,.9,.25,1);
+}
+.gauge i.up{ bottom:50%; background:var(--pos); }
+.gauge i.dn{ top:50%; background:var(--neg); }
+.wcol .wv{ font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:500; color:var(--ink-2); padding-bottom:10px; min-height:26px; }
+.wcol .wv small{ display:block; font-size:9px; color:var(--ink-3); letter-spacing:.06em; margin-top:1px; }
+
+/* ==========================================================
+   04 — KPI ROW
+   ========================================================== */
+.kpis{ display:grid; grid-template-columns:repeat(2,1fr); border-top:1px solid var(--rule); }
+@media(min-width:800px){ .kpis{ grid-template-columns:repeat(4,1fr); } }
+.kpi{ padding:18px 20px 20px; border-right:1px solid var(--rule-soft); border-bottom:1px solid var(--rule-soft); }
+.kpi:nth-child(2n){ border-right:0; }
+@media(min-width:800px){
+  .kpi{ border-bottom:0; }
+  .kpi:nth-child(2n){ border-right:1px solid var(--rule-soft); }
+  .kpi:last-child{ border-right:0; }
+}
+.kpi:first-child{ padding-left:0; }
+.kpi b{ display:block; font-family:"JetBrains Mono", monospace; font-size:9.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); }
+.kpi .v{ display:block; margin-top:12px; font-size:32px; font-weight:800; letter-spacing:-.045em; line-height:1; font-variant-numeric:tabular-nums; }
+@media(min-width:800px){ .kpi .v{ font-size:36px; } }
+.kpi .s{ display:block; margin-top:8px; font-family:"JetBrains Mono", monospace; font-size:10.5px; color:var(--ink-2); }
+
+/* ==========================================================
+   05 — HEATMAP
+   ========================================================== */
+.heat-scroll{ overflow-x:auto; padding-bottom:6px; scrollbar-width:thin; }
+.heat-inner{ min-width:760px; }
+.heat-months{ display:grid; grid-auto-flow:column; grid-auto-columns:14px; margin-left:26px; height:14px; }
+.heat-months span{ font-family:"JetBrains Mono", monospace; font-size:9px; color:var(--ink-3); letter-spacing:.06em; white-space:nowrap; }
+.heat-body{ display:flex; gap:4px; }
+.heat-days{ display:grid; grid-template-rows:repeat(7,11px); gap:3px; width:22px; }
+.heat-days span{ font-family:"JetBrains Mono", monospace; font-size:8.5px; color:var(--ink-3); line-height:11px; }
+.heat{ display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,11px); grid-auto-columns:11px; gap:3px; }
+.cell{ width:11px; height:11px; background:var(--rule-soft); }
+.cell.off{ background:transparent; }
+.legend{
+  display:flex; align-items:center; gap:8px; margin-top:16px;
+  font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3); letter-spacing:.04em; flex-wrap:wrap;
+}
+.legend i{ width:11px; height:11px; display:inline-block; }
+.legend .sep{ width:1px; height:12px; background:var(--rule); margin:0 6px; }
+
+/* ==========================================================
+   06 — TABLES
+   ========================================================== */
+.seg{ display:flex; border:1px solid var(--rule); }
+.seg button{
+  border:0; background:transparent; cursor:pointer; padding:6px 13px;
+  font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+  transition:background .18s, color .18s;
+}
+.seg button + button{ border-left:1px solid var(--rule); }
+.seg button.on{ background:var(--ink); color:var(--paper); }
+
+table{ width:100%; border-collapse:collapse; }
+th{
+  text-align:left; font-family:"JetBrains Mono", monospace; font-size:9.5px; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3);
+  padding:0 10px 9px 0; border-bottom:1px solid var(--rule);
+}
+th.r, td.r{ text-align:right; padding-right:0; }
+td{ padding:13px 10px 13px 0; border-bottom:1px solid var(--rule-soft); vertical-align:middle; }
+tbody tr:last-child td{ border-bottom:1px solid var(--rule); }
+.tperiod{ font-family:"JetBrains Mono", monospace; font-size:12px; font-weight:700; letter-spacing:.02em; }
+.tval{ font-size:19px; font-weight:700; letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
+@media(min-width:800px){ .tval{ font-size:22px; } }
+.tfat{ font-family:"JetBrains Mono", monospace; font-size:11px; color:var(--ink-2); }
+.tbar{ position:relative; height:6px; background:var(--rule-soft); min-width:60px; }
+.tbar i{ position:absolute; top:0; bottom:0; width:0; transition:width .9s cubic-bezier(.2,.9,.25,1); }
+.tstat{
+  font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;
+}
+.hide-s{ display:none; }
+@media(min-width:640px){ .hide-s{ display:table-cell; } }
+
+/* ==========================================================
+   07 — CHARTS
+   ========================================================== */
+.two{ display:grid; grid-template-columns:1fr; gap:44px; }
+@media(min-width:900px){ .two{ grid-template-columns:1.25fr 1fr; gap:52px; } }
+.area{ width:100%; height:170px; display:block; }
+.xlabels{ position:relative; height:16px; margin-top:6px; }
+.xlabels span{
+  position:absolute; transform:translateX(-50%);
+  font-family:"JetBrains Mono", monospace; font-size:9.5px; color:var(--ink-3);
+}
+.chart-note{ font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3); letter-spacing:.04em; margin-top:14px; display:flex; gap:16px; flex-wrap:wrap; }
+.chart-note em{ font-style:normal; display:inline-flex; align-items:center; gap:6px; }
+.swatch{ width:14px; height:2px; display:inline-block; background:var(--ink); }
+
+.mrow{ display:grid; grid-template-columns:26px 1fr 78px; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid var(--rule-soft); }
+.mrow:last-child{ border-bottom:0; }
+.mrow .mn{ font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--ink-3); }
+.mrow.cur .mn{ color:var(--ink); }
+.mtrack{ position:relative; height:16px; }
+.mtrack::before{ content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--rule); }
+.mtrack i{ position:absolute; top:3px; bottom:3px; width:0; transition:width .9s cubic-bezier(.2,.9,.25,1); }
+.mrow .mv{ font-family:"JetBrains Mono", monospace; font-size:11px; text-align:right; font-variant-numeric:tabular-nums; }
+
+/* ==========================================================
+   08 — ENTRIES
+   ========================================================== */
+.entries{ max-height:430px; overflow-y:auto; }
+.entries table{ border-collapse:collapse; }
+.entries thead th{ position:sticky; top:0; background:var(--paper); z-index:2; }
+.eodo{ font-family:"JetBrains Mono", monospace; font-size:12px; font-weight:500; }
+.ewd{ font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3); letter-spacing:.08em; }
+.enum{ font-family:"JetBrains Mono", monospace; font-size:12px; color:var(--ink-2); }
+.ebal{ font-size:15px; font-weight:700; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+.xbtn{
+  width:26px; height:26px; border:0; background:transparent; cursor:pointer; color:var(--ink-3);
+  display:grid; place-items:center; transition:background .16s, color .16s;
+}
+.xbtn:hover{ background:var(--neg); color:var(--paper); }
+tbody tr.erow:hover td{ background:var(--paper-2); }
+.empty{ font-family:"JetBrains Mono", monospace; font-size:11px; color:var(--ink-3); padding:26px 0; letter-spacing:.04em; }
+
+/* ==========================================================
+   09 — FOOTER / BACKUP
+   ========================================================== */
+footer{ margin-top:52px; border-top:1px solid var(--rule); padding:22px 0 40px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+.lnk{
+  border:1px solid var(--rule); background:transparent; cursor:pointer; color:var(--ink-2);
+  padding:9px 15px; font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700;
+  letter-spacing:.11em; text-transform:uppercase;
+  transition:background .18s, color .18s, border-color .18s;
+}
+.lnk:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+footer .fnote{ margin-left:auto; font-family:"JetBrains Mono", monospace; font-size:10px; color:var(--ink-3); letter-spacing:.06em; }
+
+/* ==========================================================
+   10 — ENTRY DOCK
+   ========================================================== */
+.dock{
+  position:fixed; left:0; right:0; bottom:0; z-index:45;
+  background:var(--paper); border-top:1px solid var(--ink);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.dock form{
+  max-width:1180px; margin:0 auto; padding:12px 20px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; align-items:end;
+}
+@media(min-width:800px){ .dock form{ padding:12px 40px; grid-template-columns:auto 1fr 1fr auto; gap:22px; } }
+.dockf{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.dockf label{
+  font-family:"JetBrains Mono", monospace; font-size:9px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+}
+.dockf input{
+  width:100%; border:0; border-bottom:1px solid var(--rule); background:transparent;
+  font-family:"JetBrains Mono", monospace; font-size:15px; font-weight:500; color:var(--ink);
+  padding:5px 0; outline:none; appearance:none; border-radius:0;
+  transition:border-color .18s;
+}
+.dockf input::placeholder{ color:var(--ink-3); }
+.dockf input:focus{ border-bottom-color:var(--ink); }
+.dock .go{
+  border:0; cursor:pointer; background:var(--acid); color:var(--on-acid);
+  font-family:"JetBrains Mono", monospace; font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; padding:13px 26px; height:40px;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  transition:filter .18s, transform .12s;
+}
+@media(min-width:800px){ .dock .go{ grid-column:auto; } }
+.dock .go:hover{ filter:brightness(1.06); }
+.dock .go:active{ transform:translateY(1px); }
+
+/* ==========================================================
+   11 — MODAL / TOAST
+   ========================================================== */
+.backdrop{
+  position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:20px;
+  background:color-mix(in srgb, var(--paper) 72%, transparent);
+  backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .22s;
+}
+.backdrop.show{ opacity:1; pointer-events:auto; }
+.sheet{
+  width:100%; max-width:400px; background:var(--paper); border:1px solid var(--ink); padding:26px;
+  transform:translateY(10px); transition:transform .28s cubic-bezier(.2,.9,.25,1);
+  box-shadow:10px 10px 0 var(--rule-soft);
+}
+.backdrop.show .sheet{ transform:none; }
+.sheet h3{ margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+.sheet p{ margin:0 0 24px; font-size:14px; line-height:1.5; color:var(--ink-2); }
+.sheet .acts{ display:flex; gap:10px; justify-content:flex-end; }
+.sheet button{
+  border:1px solid var(--rule); background:transparent; cursor:pointer; color:var(--ink-2);
+  font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; padding:10px 18px;
+  transition:background .18s, color .18s, border-color .18s;
+}
+#modal-cancel:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+#modal-confirm{ background:var(--neg); border-color:var(--neg); color:var(--paper); }
+#modal-confirm.info{ background:var(--ink); border-color:var(--ink); color:var(--paper); width:100%; }
+
+.toast{
+  position:fixed; left:50%; bottom:calc(var(--dockh, 150px) + 18px); z-index:80; transform:translate(-50%,10px);
+  opacity:0; pointer-events:none; transition:opacity .22s, transform .32s cubic-bezier(.2,.9,.25,1);
+  background:var(--ink); color:var(--paper); padding:11px 20px;
+  font-family:"JetBrains Mono", monospace; font-size:10.5px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;
+}
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+</style>
 </head>
-<body class="text-gray-900 p-4 min-h-screen">
+<body>
 
-    <div id="custom-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 transition-opacity">
-        <div class="card bg-white rounded-3xl p-6 max-w-sm w-full mx-4 transform transition-transform scale-100">
-            <h3 id="modal-title" class="text-lg font-extrabold text-gray-900 mb-2">Aktion bestätigen</h3>
-            <p id="modal-desc" class="text-gray-500 text-sm mb-6">Möchtest du fortfahren?</p>
-            <div class="flex gap-3 justify-end">
-                <button id="modal-cancel" class="px-4 py-2.5 rounded-full text-sm font-bold text-gray-500 hover:bg-gray-100 transition-colors">Abbrechen</button>
-                <button id="modal-confirm" class="px-4 py-2.5 rounded-full text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">Bestätigen</button>
-            </div>
-        </div>
+<!-- MODAL -->
+<div class="backdrop" id="custom-modal">
+  <div class="sheet">
+    <h3 id="modal-title">Aktion bestätigen</h3>
+    <p id="modal-desc">Möchtest du fortfahren?</p>
+    <div class="acts">
+      <button id="modal-cancel">Abbrechen</button>
+      <button id="modal-confirm">Bestätigen</button>
     </div>
+  </div>
+</div>
+<div class="toast" id="toast"><span id="toast-txt">Gespeichert</span></div>
 
-    <div class="max-w-3xl mx-auto flex flex-col gap-5">
-
-        <header class="mb-1 mt-1">
-            <h1 class="text-2xl sm:text-3xl font-extrabold flex items-center gap-2 text-gray-900">
-                Defizit Tracker PRO
-            </h1>
-            <p class="text-gray-400 text-xs sm:text-sm mt-1 font-medium">Ziel: -0,5 kg Körperfett pro Woche (3.500 kcal Defizit)</p>
-        </header>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            <div class="card rounded-3xl p-5 relative overflow-hidden">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em] mb-3">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
-                    Wochen-Status (Mo-So)
-                </div>
-                <div class="flex items-baseline">
-                    <span id="kw-val" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">0</span>
-                    <span class="text-gray-400 ml-1.5 text-base font-normal">kcal</span>
-                </div>
-                <div class="relative w-full h-2.5 bg-gray-100 rounded-full mt-4 overflow-hidden">
-                    <div id="kw-bar" class="h-full bg-emerald-500 w-0 progress-fill rounded-full"></div>
-                </div>
-                <div class="flex justify-between text-[11px] text-gray-400 mt-2 font-medium">
-                    <span id="kw-kg">~ 0.00 kg Fett</span>
-                    <span id="kw-perc" class="text-gray-500 font-bold">0%</span>
-                </div>
-            </div>
-
-            <div class="card rounded-3xl p-5 relative overflow-hidden">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em] mb-3">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4"></path><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"></path><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"></path></svg>
-                    Rollierend (Letzte 7 Tage)
-                </div>
-                <div class="flex items-baseline">
-                    <span id="stat-roll" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-400">0</span>
-                    <span class="text-gray-400 ml-1.5 text-base font-normal">kcal</span>
-                </div>
-                <div class="text-gray-400 text-xs mt-1.5 font-medium" id="stat-roll-kg">~ 0.00 kg Fett</div>
-            </div>
-
-            <div class="card rounded-3xl p-5 relative overflow-hidden">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em] mb-3">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"></rect><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"></path></svg>
-                    Monats-Defizit
-                </div>
-                <div class="flex items-baseline">
-                    <span id="stat-month" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-400">0</span>
-                    <span class="text-gray-400 ml-1.5 text-base font-normal">kcal</span>
-                </div>
-                <div class="text-gray-400 text-xs mt-1.5 font-medium" id="stat-month-kg">~ 0.00 kg Fett</div>
-            </div>
-
-            <div class="card rounded-3xl p-5 relative overflow-hidden">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em] mb-3">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="5" width="3" height="13"></rect></svg>
-                    Jahres-Defizit
-                </div>
-                <div class="flex items-baseline">
-                    <span id="stat-year" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-400">0</span>
-                    <span class="text-gray-400 ml-1.5 text-base font-normal">kcal</span>
-                </div>
-                <div class="text-gray-400 text-xs mt-1.5 font-medium" id="stat-year-kg">~ 0.00 kg Fett</div>
-            </div>
-        </div>
-
-        <div class="card rounded-3xl p-5">
-            <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em]">
-                Wochen-Checkliste
-            </div>
-            <div id="checklist" class="flex justify-between gap-1 sm:gap-2 mt-4"></div>
-        </div>
-
-        <div class="card rounded-3xl p-5 relative">
-            <div class="flex justify-between items-start mb-5">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900">Trendanalyse</h2>
-                    <p id="trend-date" class="text-gray-400 text-sm mt-0.5">Letzter Datenpunkt am ...</p>
-                </div>
-                <div class="flex bg-gray-100 rounded-full p-1">
-                    <button id="btn-durch" onclick="setTrendMode('Durch')" class="px-3 py-1.5 text-xs font-bold rounded-full bg-white text-gray-900 shadow-sm transition-colors">Durch</button>
-                    <button id="btn-ges" onclick="setTrendMode('Ges')" class="px-3 py-1.5 text-xs font-bold rounded-full text-gray-400 hover:text-gray-600 transition-colors">Ges.</button>
-                </div>
-            </div>
-
-            <div class="w-full">
-                <div class="grid grid-cols-3 text-left text-gray-400 font-bold uppercase tracking-[0.05em] text-[10px] sm:text-xs mb-2 pb-3 border-b border-gray-100">
-                    <div>Zeitraum</div>
-                    <div>Energie / Fett</div>
-                    <div>Bilanz</div>
-                </div>
-                <div id="trend-list" class="flex flex-col">
-                    <!-- Rows will be rendered here -->
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="card rounded-3xl p-5">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em]">
-                    Monatlicher Trend (Tägl. Defizit)
-                </div>
-                <div id="chart" class="h-[120px] flex gap-[3px] mt-5 relative mb-6">
-                    <div class="chart-zero-line"></div>
-                </div>
-            </div>
-
-            <div class="card rounded-3xl p-5">
-                <div class="flex items-center gap-2 text-gray-400 text-[11px] font-bold uppercase tracking-[0.1em]">
-                    Jahres-Übersicht (Monatl. Summe)
-                </div>
-                <div id="yearly-chart" class="h-[120px] flex gap-[3px] mt-5 relative mb-6">
-                    <div class="chart-zero-line"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card rounded-3xl p-5 sm:p-6">
-            <form id="kcal-form" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs text-gray-400 font-bold pl-1">Datum</label>
-                    <input type="date" id="in-date" required class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900 text-base outline-none focus:border-blue-500 transition-colors appearance-none">
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs text-gray-400 font-bold pl-1">Essen (kcal)</label>
-                    <input type="number" id="in-kcal" placeholder="1900" required inputmode="numeric" class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900 text-base outline-none focus:border-blue-500 transition-colors appearance-none">
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-xs text-gray-400 font-bold pl-1">Verbrauch (Garmin)</label>
-                    <input type="number" id="in-burn" value="2450" required inputmode="numeric" class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-gray-900 text-base outline-none focus:border-blue-500 transition-colors appearance-none">
-                </div>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold rounded-xl py-3 px-5 transition-all w-full h-[46px] flex items-center justify-center">
-                    Speichern
-                </button>
-            </form>
-        </div>
-
-        <div class="card rounded-3xl overflow-hidden">
-            <div class="p-5 cursor-pointer flex justify-between items-center select-none hover:bg-gray-50 transition-colors" onclick="toggleHistory()">
-                <h2 class="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400">Verlauf der Einträge</h2>
-                <svg class="chevron text-gray-400" id="history-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </div>
-            <div id="history-list" class="history-content px-5">
-                <!-- Entries rendered here -->
-            </div>
-        </div>
-
-        <div class="flex gap-3 mb-10 mt-2">
-            <button onclick="exportJSON()" class="card flex-1 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm py-3 px-4 rounded-full cursor-pointer transition-colors font-bold flex items-center justify-center gap-2">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                Backup speichern
-            </button>
-            <input type="file" id="file-in" style="display:none" accept=".json">
-            <button onclick="document.getElementById('file-in').click()" class="card flex-1 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm py-3 px-4 rounded-full cursor-pointer transition-colors font-bold flex items-center justify-center gap-2">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                Backup laden
-            </button>
-        </div>
+<!-- MASTHEAD -->
+<div class="mast">
+  <div class="wrap">
+    <div class="mark">DT</div>
+    <div class="wordmark">Defizit&nbsp;Tracker <em>/ Kalorienbilanz</em></div>
+    <div class="ticker">
+      <div class="tick"><b>7 Tage</b><span class="num" id="t-roll">–</span></div>
+      <div class="tick"><b>Monat</b><span class="num" id="t-month">–</span></div>
+      <div class="tick"><b>Jahr</b><span class="num" id="t-year">–</span></div>
     </div>
-
-    <script>
-        const KEY = 'fitness_tracker_v3';
-        const TARGET_WEEKLY_DEFICIT = 3500;
-        const DAILY_GOAL_MAX = 1900;
-        const DAILY_BURN_DEFAULT = 2450;
-
-        let data = JSON.parse(localStorage.getItem(KEY) || '[]');
-        let isHistoryOpen = false;
-        window.trendMode = 'Durch'; // 'Durch' (Average) or 'Ges' (Total)
-
-        let modalCallback = null;
-        function showModal(title, desc, confirmText, callback, isAlert = false) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-desc').innerText = desc;
-
-            const confirmBtn = document.getElementById('modal-confirm');
-            const cancelBtn = document.getElementById('modal-cancel');
-
-            confirmBtn.innerText = confirmText;
-
-            if (isAlert) {
-                confirmBtn.className = 'px-4 py-2.5 rounded-full text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors w-full';
-                cancelBtn.style.display = 'none';
-            } else {
-                confirmBtn.className = 'px-4 py-2.5 rounded-full text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 transition-colors';
-                cancelBtn.style.display = 'block';
-            }
-
-            modalCallback = callback;
-            document.getElementById('custom-modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-            modalCallback = null;
-        }
-
-        document.getElementById('modal-confirm').onclick = () => {
-            if (modalCallback) modalCallback();
-            closeModal();
-        };
-        document.getElementById('modal-cancel').onclick = closeModal;
-
-        function getISO(d) {
-            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-            return (new Date(d - tzoffset)).toISOString().split('T')[0];
-        }
-
-        function getMondayOfDate(d) {
-            const date = new Date(d);
-            const day = date.getDay();
-            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(date.setDate(diff));
-        }
-
-        window.toggleHistory = function() {
-            isHistoryOpen = !isHistoryOpen;
-            const content = document.getElementById('history-list');
-            const chevron = document.getElementById('history-chevron');
-
-            if (isHistoryOpen) {
-                content.classList.add('open');
-                chevron.classList.add('open');
-            } else {
-                content.classList.remove('open');
-                chevron.classList.remove('open');
-            }
-        };
-
-        window.setTrendMode = function(mode) {
-            window.trendMode = mode;
-            if (mode === 'Durch') {
-                document.getElementById('btn-durch').className = 'px-3 py-1.5 text-xs font-bold rounded-full bg-white text-gray-900 shadow-sm transition-colors';
-                document.getElementById('btn-ges').className = 'px-3 py-1.5 text-xs font-bold rounded-full text-gray-400 hover:text-gray-600 transition-colors';
-            } else {
-                document.getElementById('btn-ges').className = 'px-3 py-1.5 text-xs font-bold rounded-full bg-white text-gray-900 shadow-sm transition-colors';
-                document.getElementById('btn-durch').className = 'px-3 py-1.5 text-xs font-bold rounded-full text-gray-400 hover:text-gray-600 transition-colors';
-            }
-            renderTrendanalyse();
-        };
-
-        function update() {
-            data.sort((a, b) => b.date.localeCompare(a.date));
-            localStorage.setItem(KEY, JSON.stringify(data));
-
-            const now = new Date();
-            const todayStr = getISO(now);
-
-            const mon = getMondayOfDate(now);
-            const monStr = getISO(mon);
-
-            const sevenDaysAgo = new Date(now);
-            sevenDaysAgo.setDate(now.getDate() - 6);
-            const sevenDaysAgoStr = getISO(sevenDaysAgo);
-
-            let kwDeficit = 0;
-            let monthDeficit = 0;
-            let rollDeficit = 0;
-            let yearDeficit = 0;
-            const monthPrefix = todayStr.substring(0, 7);
-            const yearPrefix = todayStr.substring(0, 4);
-
-            data.forEach(e => {
-                const def = e.targetBurn - e.consumed;
-                if (e.date >= monStr && e.date <= todayStr) kwDeficit += def;
-                if (e.date.startsWith(monthPrefix)) monthDeficit += def;
-                if (e.date >= sevenDaysAgoStr && e.date <= todayStr) rollDeficit += def;
-                if (e.date.startsWith(yearPrefix)) yearDeficit += def;
-            });
-
-            const formatKg = (def) => {
-                const val = Math.abs(def / 7000).toFixed(2);
-                if (def > 0) return `~ -${val} kg Fett`;
-                if (def < 0) return `~ +${val} kg Fett`;
-                return `~ 0.00 kg Fett`;
-            };
-
-            updateStatDisplay(document.getElementById('kw-val'), kwDeficit);
-            const perc = Math.min(100, Math.max(0, (kwDeficit / TARGET_WEEKLY_DEFICIT) * 100));
-            document.getElementById('kw-bar').style.width = perc + '%';
-            document.getElementById('kw-perc').innerText = Math.round(perc) + '%';
-            document.getElementById('kw-kg').innerText = formatKg(kwDeficit);
-
-            updateStatDisplay(document.getElementById('stat-roll'), rollDeficit);
-            document.getElementById('stat-roll-kg').innerText = formatKg(rollDeficit);
-
-            updateStatDisplay(document.getElementById('stat-month'), monthDeficit);
-            document.getElementById('stat-month-kg').innerText = formatKg(monthDeficit);
-
-            updateStatDisplay(document.getElementById('stat-year'), yearDeficit);
-            document.getElementById('stat-year-kg').innerText = formatKg(yearDeficit);
-
-            renderChecklist(mon);
-            renderChart(monthPrefix);
-            renderYearlyChart(yearPrefix);
-            renderHistory();
-            renderTrendanalyse();
-        }
-
-        function renderTrendanalyse() {
-            const list = document.getElementById('trend-list');
-            const dateLabel = document.getElementById('trend-date');
-
-            if (data.length === 0) {
-                list.innerHTML = '<p class="text-sm text-gray-400 py-3">Noch keine Daten für eine Analyse vorhanden.</p>';
-                dateLabel.innerText = 'Keine Daten';
-                return;
-            }
-
-            const latestEntry = data[0]; // Since data is sorted desc
-            const [y, m, d] = latestEntry.date.split('-');
-            const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-            dateLabel.innerText = `Letzter Datenpunkt am ${parseInt(d)}. ${months[parseInt(m)-1]} ${y}`;
-
-            const periods = [3, 7, 14, 30, 90];
-            let html = '';
-
-            const today = new Date();
-            const todayStr = getISO(today);
-
-            periods.forEach((days, index) => {
-                let netEnergy = 0;
-                let validDaysCount = 0;
-
-                const startDate = new Date();
-                startDate.setDate(today.getDate() - days + 1);
-                const startStr = getISO(startDate);
-
-                data.forEach(e => {
-                    if (e.date >= startStr && e.date <= todayStr) {
-                        // Nettoenergie im Screenshot: Überschuss ist +, Defizit ist -
-                        netEnergy += (e.consumed - e.targetBurn);
-                        validDaysCount++;
-                    }
-                });
-
-                let displayValue = netEnergy;
-                if (window.trendMode === 'Durch' && validDaysCount > 0) {
-                    displayValue = Math.round(netEnergy / validDaysCount);
-                }
-
-                const isSurplus = displayValue > 0;
-                const isDeficit = displayValue < 0;
-
-                let valueText = (displayValue > 0 ? '+' : '') + displayValue + ' kcal';
-                let statusText = isSurplus ? 'Überschuss' : (isDeficit ? 'Defizit' : 'Ausgegl.');
-
-                // Fett Äquivalent
-                let fatValue = (displayValue / 7000).toFixed(2);
-                let fatText = (displayValue > 0 ? '+' : '') + fatValue + ' kg';
-
-                let iconHtml = '';
-                let colorClass = 'text-gray-400';
-
-                if (isSurplus) {
-                    colorClass = 'text-indigo-600'; // Blau für Überschuss wie im Bild
-                    iconHtml = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>`;
-                } else if (isDeficit) {
-                    colorClass = 'text-orange-500'; // Orange für Defizit wie im Bild
-                    iconHtml = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>`;
-                } else {
-                    iconHtml = `<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"></path></svg>`;
-                }
-
-                const borderClass = index !== periods.length - 1 ? 'border-b border-gray-100' : '';
-
-                html += `
-                    <div class="grid grid-cols-3 items-center py-3.5 sm:py-4 ${borderClass}">
-                        <div class="text-gray-600 font-medium text-sm sm:text-base">${days} Tage</div>
-                        <div class="flex flex-col justify-center">
-                            <span class="font-bold text-sm sm:text-base text-gray-900">${valueText}</span>
-                            <span class="text-gray-400 text-[11px] sm:text-xs mt-0.5 font-medium tracking-wide">~ ${fatText}</span>
-                        </div>
-                        <div class="flex items-center font-bold text-sm sm:text-base ${colorClass}">
-                            ${iconHtml}
-                            ${statusText}
-                        </div>
-                    </div>
-                `;
-            });
-
-            list.innerHTML = html;
-        }
-
-        function renderChecklist(mon) {
-            const container = document.getElementById('checklist');
-            const names = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-            let html = '';
-            for(let i=0; i<7; i++) {
-                const d = new Date(mon); d.setDate(mon.getDate() + i);
-                const ds = getISO(d);
-                const entry = data.find(e => e.date === ds);
-
-                let dotClass = 'bg-gray-50 border border-gray-100 text-gray-300';
-                let symbol = '•';
-
-                if(entry) {
-                    if(entry.consumed <= DAILY_GOAL_MAX) {
-                        dotClass = 'bg-emerald-500/10 border border-emerald-500 text-emerald-500';
-                        symbol = '✓';
-                    }
-                    else if(entry.consumed > entry.targetBurn) {
-                        dotClass = 'bg-rose-500/10 border border-rose-400 text-rose-500';
-                        symbol = '✕';
-                    }
-                    else {
-                        dotClass = 'bg-orange-500/10 border border-orange-400 text-orange-500';
-                        symbol = '~';
-                    }
-                }
-
-                html += `
-                <div class="flex-1 flex flex-col items-center gap-2">
-                    <span class="text-[11px] font-bold text-gray-400">${names[i]}</span>
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-[10px] flex items-center justify-center text-sm transition-all duration-300 ${dotClass}">
-                        ${symbol}
-                    </div>
-                </div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function renderChart(prefix) {
-            const chart = document.getElementById('chart');
-            chart.innerHTML = '<div class="chart-zero-line"></div>';
-            const year = parseInt(prefix.split('-')[0]);
-            const month = parseInt(prefix.split('-')[1]);
-            const daysInMonth = new Date(year, month, 0).getDate();
-
-            for(let i=1; i<=daysInMonth; i++) {
-                const ds = `${prefix}-${String(i).padStart(2,'0')}`;
-                const entry = data.find(e => e.date === ds);
-                if(!entry && i > new Date().getDate() && year === new Date().getFullYear() && month === new Date().getMonth() + 1) break;
-
-                const def = entry ? (entry.targetBurn - entry.consumed) : 0;
-                const h = Math.min(60, Math.abs(def) / 20);
-
-                const wrap = document.createElement('div');
-                wrap.className = 'flex-1 h-full relative';
-
-                if (entry || i <= new Date().getDate()) {
-                    const bar = document.createElement('div');
-                    if (def >= 0) {
-                        bar.className = 'absolute top-1/2 w-full bg-emerald-500 rounded-b-[2px]';
-                        bar.style.height = Math.max(2, h) + 'px';
-                    } else {
-                        bar.className = 'absolute bottom-1/2 w-full bg-rose-400 rounded-t-[2px]';
-                        bar.style.height = Math.max(2, h) + 'px';
-                    }
-                    wrap.appendChild(bar);
-                }
-
-                if(i % 5 === 0 || i === 1) {
-                    const l = document.createElement('span');
-                    l.className = 'absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 text-center w-full overflow-hidden whitespace-nowrap';
-                    l.innerText = i;
-                    wrap.appendChild(l);
-                }
-                chart.appendChild(wrap);
-            }
-        }
-
-        function renderYearlyChart(year) {
-            const chart = document.getElementById('yearly-chart');
-            chart.innerHTML = '<div class="chart-zero-line"></div>';
-            const monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
-
-            const monthlySums = new Array(12).fill(0);
-            const hasData = new Array(12).fill(false);
-
-            data.forEach(e => {
-                if (e.date.startsWith(year)) {
-                    const mIdx = parseInt(e.date.split('-')[1]) - 1;
-                    monthlySums[mIdx] += (e.targetBurn - e.consumed);
-                    hasData[mIdx] = true;
-                }
-            });
-
-            for(let i=0; i<12; i++) {
-                const def = monthlySums[i];
-                const h = Math.min(60, Math.abs(def) / 200);
-
-                const wrap = document.createElement('div');
-                wrap.className = 'flex-1 h-full relative';
-
-                if (hasData[i] || (year == new Date().getFullYear() && i <= new Date().getMonth())) {
-                    const bar = document.createElement('div');
-                    if (def >= 0) {
-                        bar.className = 'absolute top-1/2 w-full bg-emerald-500 rounded-b-[2px]';
-                        bar.style.height = Math.max(2, h) + 'px';
-                    } else {
-                        bar.className = 'absolute bottom-1/2 w-full bg-rose-400 rounded-t-[2px]';
-                        bar.style.height = Math.max(2, h) + 'px';
-                    }
-                    wrap.appendChild(bar);
-                }
-
-                const l = document.createElement('span');
-                l.className = 'absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[8px] text-gray-400 text-center w-full overflow-hidden whitespace-nowrap';
-                l.innerText = monthNames[i];
-                wrap.appendChild(l);
-
-                chart.appendChild(wrap);
-            }
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-list');
-            if(data.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-400 py-5 text-sm">Noch keine Einträge.</p>';
-                return;
-            }
-
-            container.innerHTML = data.map(e => {
-                const def = e.targetBurn - e.consumed;
-                let defColor = 'text-gray-400';
-                let displayDef = def;
-
-                if (def > 0) {
-                    defColor = 'text-emerald-600';
-                    displayDef = "-" + def;
-                } else if (def < 0) {
-                    defColor = 'text-rose-500';
-                    displayDef = "+" + Math.abs(def);
-                }
-
-                return `
-                <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 sm:p-4 flex items-center justify-between mb-2">
-                    <div class="text-xs sm:text-sm font-semibold text-gray-500 font-mono">${e.date.split('-').reverse().join('.')}</div>
-                    <div class="text-sm font-medium text-gray-900">${e.consumed} <span class="text-gray-400">/ ${e.targetBurn}</span></div>
-                    <div class="font-extrabold text-sm sm:text-base ${defColor}">${displayDef}</div>
-                    <button class="bg-transparent text-gray-400 text-lg p-1 sm:p-2 rounded-lg hover:text-rose-500 transition-colors focus:outline-none"
-                            onclick="del('${e.date}'); event.stopPropagation();" title="Löschen">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>`;
-            }).join('');
-        }
-
-        function updateStatDisplay(el, val) {
-            let displayVal = val;
-            if (val > 0) displayVal = "-" + val;
-            else if (val < 0) displayVal = "+" + Math.abs(val);
-
-            el.innerText = displayVal;
-            el.className = 'text-3xl sm:text-4xl font-extrabold tracking-tight';
-            if (val > 0) el.classList.add('text-emerald-600');
-            else if (val < 0) el.classList.add('text-rose-500');
-            else el.classList.add('text-gray-400');
-        }
-
-        document.getElementById('kcal-form').onsubmit = (e) => {
-            e.preventDefault();
-            const date = document.getElementById('in-date').value;
-            const consumed = parseInt(document.getElementById('in-kcal').value);
-            const targetBurn = parseInt(document.getElementById('in-burn').value);
-            data = data.filter(d => d.date !== date);
-            data.push({date, consumed, targetBurn});
-            update();
-            document.getElementById('in-kcal').value = '';
-            document.getElementById('in-date').value = getISO(new Date());
-        };
-
-        window.del = (date) => {
-            showModal(
-                'Eintrag löschen',
-                `Möchtest du den Eintrag für den ${date.split('-').reverse().join('.')} wirklich löschen?`,
-                'Löschen',
-                () => {
-                    data = data.filter(d => d.date !== date);
-                    update();
-                }
-            );
-        };
-
-        window.exportJSON = () => {
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `kalorien_backup_${getISO(new Date())}.json`;
-            a.click();
-        };
-
-        document.getElementById('file-in').onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    const imported = JSON.parse(ev.target.result);
-                    data = imported.map(item => ({
-                        date: item.date,
-                        consumed: item.consumed || item.kcal || 0,
-                        targetBurn: item.targetBurn || item.burn || DAILY_BURN_DEFAULT
-                    }));
-                    update();
-                } catch(err) {
-                    showModal('Import-Fehler', 'Es gab einen Fehler beim Lesen der Backup-Datei. Ist das Format gültig?', 'Verstanden', null, true);
-                }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
-        };
-
-        document.getElementById('in-date').value = getISO(new Date());
-        update();
-    </script>
+    <button class="toggle" id="theme-btn" title="Hell / Dunkel / System" aria-label="Design wechseln">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9c-4.97 0-9-4.03-9-9Z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 01 WOCHE -->
+  <section>
+    <div class="sec"><span class="idx">01</span><h2>Diese Woche</h2><span class="fill"></span><span class="meta" id="week-range">Mo – So</span></div>
+    <div class="hero">
+      <div>
+        <span class="giant" id="kw-val">0<sup>kcal</sup></span>
+        <div class="giant-sub" id="kw-kg">~ 0,00 kg Körperfett</div>
+        <div class="goalbar" id="goalbar">
+          <div class="track"><div class="fill" id="kw-fill"></div></div>
+          <div class="marks">
+            <span id="kw-perc">0 % vom Wochenziel</span>
+            <span id="kw-rest">Ziel 3.500 kcal</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="weekgrid" id="weekgrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 KENNZAHLEN -->
+  <section>
+    <div class="sec"><span class="idx">02</span><h2>Kennzahlen</h2><span class="fill"></span><span class="meta" id="kpi-meta">–</span></div>
+    <div class="kpis">
+      <div class="kpi">
+        <b>7 Tage rollierend</b>
+        <span class="v num" id="stat-roll">0</span>
+        <span class="s" id="stat-roll-kg">~ 0,00 kg</span>
+      </div>
+      <div class="kpi">
+        <b>Monat</b>
+        <span class="v num" id="stat-month">0</span>
+        <span class="s" id="stat-month-kg">~ 0,00 kg</span>
+      </div>
+      <div class="kpi">
+        <b>Jahr</b>
+        <span class="v num" id="stat-year">0</span>
+        <span class="s" id="stat-year-kg">~ 0,00 kg</span>
+      </div>
+      <div class="kpi">
+        <b>Serie im Defizit</b>
+        <span class="v num" id="stat-streak">0</span>
+        <span class="s" id="stat-streak-sub">Tage in Folge</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 HEATMAP -->
+  <section>
+    <div class="sec"><span class="idx">03</span><h2>Jahresraster</h2><span class="fill"></span><span class="meta" id="heat-meta">–</span></div>
+    <div class="heat-scroll">
+      <div class="heat-inner">
+        <div class="heat-months" id="heat-months"></div>
+        <div class="heat-body">
+          <div class="heat-days"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span>So</span></div>
+          <div class="heat" id="heat"></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span>Defizit</span>
+      <i style="background:var(--rule-soft)"></i>
+      <i class="lg1"></i><i class="lg2"></i><i class="lg3"></i><i class="lg4"></i>
+      <span>mehr</span>
+      <span class="sep"></span>
+      <i class="lg5"></i><span>Überschuss</span>
+    </div>
+  </section>
+
+  <!-- 04 TREND -->
+  <section>
+    <div class="sec"><span class="idx">04</span><h2>Trendanalyse</h2><span class="fill"></span>
+      <div class="seg" id="seg">
+        <button id="btn-durch" class="on">Ø / Tag</button>
+        <button id="btn-ges">Gesamt</button>
+      </div>
+    </div>
+    <div class="meta mono" id="trend-date" style="font-size:10px;color:var(--ink-3);letter-spacing:.06em;margin:-10px 0 18px">Letzter Datenpunkt am …</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:76px">Zeitraum</th>
+          <th>Nettoenergie</th>
+          <th class="hide-s">Körperfett</th>
+          <th class="hide-s">Verteilung</th>
+          <th class="r">Bilanz</th>
+        </tr>
+      </thead>
+      <tbody id="trend-list"></tbody>
+    </table>
+  </section>
+
+  <!-- 05 CHARTS -->
+  <section>
+    <div class="sec"><span class="idx">05</span><h2>Verläufe</h2><span class="fill"></span><span class="meta" id="chart-meta">–</span></div>
+    <div class="two">
+      <div>
+        <div class="mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Aktueller Monat · Tagesbilanz</div>
+        <svg class="area" id="chart" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true"></svg>
+        <div class="xlabels" id="chart-x"></div>
+        <div class="chart-note">
+          <em><i class="swatch" style="background:var(--pos)"></i> Defizit</em>
+          <em><i class="swatch" style="background:var(--neg)"></i> Überschuss</em>
+          <em><i class="swatch" style="background:var(--ink)"></i> Ø 7 Tage</em>
+        </div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Jahr · Summe je Monat</div>
+        <div id="yearly-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 EINTRÄGE -->
+  <section>
+    <div class="sec"><span class="idx">06</span><h2>Einträge</h2><span class="fill"></span><span class="meta" id="hist-count">0</span></div>
+    <div class="entries">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:104px">Datum</th>
+            <th class="hide-s" style="width:44px">Tag</th>
+            <th class="r">Essen</th>
+            <th class="r">Verbrauch</th>
+            <th class="r">Bilanz</th>
+            <th style="width:34px"></th>
+          </tr>
+        </thead>
+        <tbody id="history-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <button class="lnk" id="btn-export">Backup speichern</button>
+    <input type="file" id="file-in" style="display:none" accept=".json">
+    <button class="lnk" id="btn-import">Backup laden</button>
+    <span class="fnote">3.500 kcal ≙ 0,5 kg · 7.000 kcal ≙ 1,0 kg</span>
+  </footer>
+</div>
+
+<!-- ENTRY DOCK -->
+<div class="dock">
+  <form id="kcal-form">
+    <div class="dockf">
+      <label for="in-date">Datum</label>
+      <input type="date" id="in-date" required>
+    </div>
+    <div class="dockf">
+      <label for="in-kcal">Essen · kcal</label>
+      <input type="number" id="in-kcal" placeholder="1900" required inputmode="numeric">
+    </div>
+    <div class="dockf">
+      <label for="in-burn">Verbrauch · Garmin</label>
+      <input type="number" id="in-burn" value="2450" required inputmode="numeric">
+    </div>
+    <button type="submit" class="go">Eintragen</button>
+  </form>
+</div>
+
+<script>
+/* ============================================================
+   DATEN — unverändert gegenüber der Ursprungsversion
+   ============================================================ */
+const KEY = 'fitness_tracker_v3';
+const TARGET_WEEKLY_DEFICIT = 3500;
+const DAILY_GOAL_MAX = 1900;
+const DAILY_BURN_DEFAULT = 2450;
+
+let data = JSON.parse(localStorage.getItem(KEY) || '[]');
+window.trendMode = 'Durch'; // 'Durch' | 'Ges'
+
+const nf = new Intl.NumberFormat('de-DE');
+const fmt2 = n => Math.abs(n).toFixed(2).replace('.', ',');
+const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const MSHORT = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+const WD = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+/* ---------- Theme ---------- */
+(function(){
+  const saved = localStorage.getItem('tracker_theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('theme-btn').onclick = () => {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
+    if (next){ document.documentElement.setAttribute('data-theme', next); localStorage.setItem('tracker_theme', next); }
+    else { document.documentElement.removeAttribute('data-theme'); localStorage.removeItem('tracker_theme'); }
+    toast(next === 'dark' ? 'Dunkel' : next === 'light' ? 'Hell' : 'System');
+    update();
+  };
+})();
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-txt').innerText = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2100);
+}
+
+/* ---------- Modal ---------- */
+let modalCallback = null;
+function showModal(title, desc, confirmText, callback, isAlert = false){
+  document.getElementById('modal-title').innerText = title;
+  document.getElementById('modal-desc').innerText = desc;
+  const c = document.getElementById('modal-confirm'), x = document.getElementById('modal-cancel');
+  c.innerText = confirmText;
+  c.classList.toggle('info', isAlert);
+  x.style.display = isAlert ? 'none' : 'block';
+  modalCallback = callback;
+  document.getElementById('custom-modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('custom-modal').classList.remove('show'); modalCallback = null; }
+document.getElementById('modal-confirm').onclick = () => { if (modalCallback) modalCallback(); closeModal(); };
+document.getElementById('modal-cancel').onclick = closeModal;
+document.getElementById('custom-modal').addEventListener('click', e => { if (e.target.id === 'custom-modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ---------- Datum ---------- */
+function getISO(d){
+  const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+  return (new Date(d - tzoffset)).toISOString().split('T')[0];
+}
+function getMondayOfDate(d){
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(date.setDate(diff));
+}
+const ddmm = iso => iso.split('-').reverse().join('.');
+
+/* ---------- Formatierung: Defizit = "−", Überschuss = "+" ---------- */
+function statText(val){
+  if (val > 0) return '−' + nf.format(val);
+  if (val < 0) return '+' + nf.format(-val);
+  return '0';
+}
+function kgText(def){
+  const v = fmt2(def / 7000);
+  if (def > 0) return `~ −${v} kg`;
+  if (def < 0) return `~ +${v} kg`;
+  return '~ 0,00 kg';
+}
+function signClass(v){ return v > 0 ? 'pos' : v < 0 ? 'neg' : 'zeroc'; }
+function paint(el, val, suffix){
+  el.classList.remove('pos','neg','zeroc');
+  el.classList.add(signClass(val));
+  el.textContent = statText(val) + (suffix || '');
+}
+
+/* ---------- Trendmodus ---------- */
+function setTrendMode(mode){
+  window.trendMode = mode;
+  document.getElementById('btn-durch').classList.toggle('on', mode === 'Durch');
+  document.getElementById('btn-ges').classList.toggle('on', mode !== 'Durch');
+  renderTrendanalyse();
+}
+document.getElementById('btn-durch').onclick = () => setTrendMode('Durch');
+document.getElementById('btn-ges').onclick   = () => setTrendMode('Ges');
+
+/* ============================================================
+   UPDATE — Rechenlogik 1:1
+   ============================================================ */
+function update(){
+  data.sort((a, b) => b.date.localeCompare(a.date));
+  localStorage.setItem(KEY, JSON.stringify(data));
+
+  const now = new Date();
+  const todayStr = getISO(now);
+
+  const mon = getMondayOfDate(now);
+  const monStr = getISO(mon);
+
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(now.getDate() - 6);
+  const sevenDaysAgoStr = getISO(sevenDaysAgo);
+
+  let kwDeficit = 0, monthDeficit = 0, rollDeficit = 0, yearDeficit = 0, kwDays = 0;
+  const monthPrefix = todayStr.substring(0, 7);
+  const yearPrefix  = todayStr.substring(0, 4);
+
+  data.forEach(e => {
+    const def = e.targetBurn - e.consumed;
+    if (e.date >= monStr && e.date <= todayStr){ kwDeficit += def; kwDays++; }
+    if (e.date.startsWith(monthPrefix)) monthDeficit += def;
+    if (e.date >= sevenDaysAgoStr && e.date <= todayStr) rollDeficit += def;
+    if (e.date.startsWith(yearPrefix)) yearDeficit += def;
+  });
+
+  /* Hero */
+  const g = document.getElementById('kw-val');
+  g.className = 'giant ' + signClass(kwDeficit);
+  g.innerHTML = statText(kwDeficit) + '<sup>kcal</sup>';
+  document.getElementById('kw-kg').textContent = kgText(kwDeficit) + ' Körperfett';
+
+  const perc = Math.min(100, Math.max(0, (kwDeficit / TARGET_WEEKLY_DEFICIT) * 100));
+  document.getElementById('kw-fill').style.width = perc + '%';
+  document.getElementById('goalbar').classList.toggle('hit', perc >= 100);
+  document.getElementById('kw-perc').textContent = Math.round(perc) + ' % vom Wochenziel · ' + kwDays + '/7 Tage';
+  const rest = TARGET_WEEKLY_DEFICIT - kwDeficit;
+  document.getElementById('kw-rest').textContent = rest > 0 ? 'noch ' + nf.format(rest) + ' kcal' : 'Ziel +' + nf.format(-rest) + ' kcal';
+
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  document.getElementById('week-range').textContent = ddmm(getISO(mon)) + ' – ' + ddmm(getISO(sun));
+
+  /* Ticker + KPI */
+  paint(document.getElementById('t-roll'), rollDeficit);
+  paint(document.getElementById('t-month'), monthDeficit);
+  paint(document.getElementById('t-year'), yearDeficit);
+
+  paint(document.getElementById('stat-roll'), rollDeficit);
+  document.getElementById('stat-roll-kg').textContent = kgText(rollDeficit) + ' Körperfett';
+  paint(document.getElementById('stat-month'), monthDeficit);
+  document.getElementById('stat-month-kg').textContent = kgText(monthDeficit) + ' Körperfett';
+  paint(document.getElementById('stat-year'), yearDeficit);
+  document.getElementById('stat-year-kg').textContent = kgText(yearDeficit) + ' Körperfett';
+
+  document.getElementById('kpi-meta').textContent = MONTHS[now.getMonth()] + ' ' + yearPrefix;
+  document.getElementById('chart-meta').textContent = MONTHS[now.getMonth()] + ' ' + yearPrefix;
+  document.getElementById('heat-meta').textContent = yearPrefix;
+
+  renderStreak(now);
+  renderWeek(mon, todayStr);
+  renderHeatmap(parseInt(yearPrefix, 10));
+  renderTrendanalyse();
+  renderChart(monthPrefix);
+  renderYearlyChart(yearPrefix);
+  renderHistory();
+}
+
+/* ---------- Serie ---------- */
+function renderStreak(now){
+  const byDate = Object.fromEntries(data.map(e => [e.date, e]));
+  let streak = 0;
+  const d = new Date(now);
+  if (!byDate[getISO(d)]) d.setDate(d.getDate() - 1);
+  while (streak <= 999){
+    const e = byDate[getISO(d)];
+    if (!e || (e.targetBurn - e.consumed) <= 0) break;
+    streak++; d.setDate(d.getDate() - 1);
+  }
+  const el = document.getElementById('stat-streak');
+  el.classList.remove('pos','neg','zeroc');
+  el.classList.add(streak > 0 ? 'pos' : 'zeroc');
+  el.textContent = streak;
+  document.getElementById('stat-streak-sub').textContent =
+    streak === 0 ? 'noch keine Serie' : (streak === 1 ? 'Tag in Folge' : 'Tage in Folge');
+}
+
+/* ---------- Wochenraster (Schwellen unverändert) ---------- */
+function renderWeek(mon, todayStr){
+  const names = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const grid = document.getElementById('weekgrid');
+  const pending = [];
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 7; i++){
+    const dt = new Date(mon); dt.setDate(mon.getDate() + i);
+    const ds = getISO(dt);
+    const entry = data.find(e => e.date === ds);
+
+    const col = document.createElement('div');
+    col.className = 'wcol' + (ds === todayStr ? ' now' : '');
+    col.title = ddmm(ds);
+
+    let mark = '·', val = '';
+    if (entry){
+      const def = entry.targetBurn - entry.consumed;
+      val = statText(def);
+      // gleiche Bewertung wie bisher
+      if (entry.consumed <= DAILY_GOAL_MAX) mark = 'Ziel';
+      else if (entry.consumed > entry.targetBurn) mark = 'über';
+      else mark = 'knapp';
+    }
+
+    col.innerHTML =
+      '<div class="wd">' + names[i] + '</div>' +
+      '<div class="gauge"><span class="axis"></span></div>' +
+      '<div class="wv ' + (entry ? signClass(entry.targetBurn - entry.consumed) : 'zeroc') + '">' +
+        (val || '–') + '<small>' + mark + '</small></div>';
+
+    if (entry){
+      const def = entry.targetBurn - entry.consumed;
+      const bar = document.createElement('i');
+      bar.className = def >= 0 ? 'up' : 'dn';
+      pending.push([bar, Math.max(2, Math.min(36, Math.abs(def) / 900 * 36))]);
+      col.querySelector('.gauge').appendChild(bar);
+    }
+    grid.appendChild(col);
+  }
+  requestAnimationFrame(() => pending.forEach(([b, h]) => b.style.height = h + 'px'));
+}
+
+/* ---------- Jahresraster (Heatmap) ---------- */
+function heatColor(def){
+  if (def === null) return 'var(--rule-soft)';
+  if (def < 0){
+    const a = Math.min(1, Math.max(.4, Math.abs(def) / 700));
+    return `color-mix(in srgb, var(--neg) ${Math.round(a * 100)}%, transparent)`;
+  }
+  if (def === 0) return 'var(--rule-soft)';
+  const lvl = def < 250 ? 30 : def < 500 ? 55 : def < 750 ? 78 : 100;
+  return `color-mix(in srgb, var(--pos) ${lvl}%, transparent)`;
+}
+function renderHeatmap(year){
+  const heat = document.getElementById('heat');
+  const months = document.getElementById('heat-months');
+  heat.innerHTML = ''; months.innerHTML = '';
+
+  const byDate = Object.fromEntries(data.map(e => [e.date, e.targetBurn - e.consumed]));
+  const start = getMondayOfDate(new Date(year, 0, 1));
+  const todayStr = getISO(new Date());
+
+  for (let w = 0; w < 53; w++){
+    // Monatsbeschriftung: Woche, in der ein Monatserster liegt
+    let label = '';
+    for (let d = 0; d < 7; d++){
+      const c = new Date(start); c.setDate(start.getDate() + w * 7 + d);
+      if (c.getFullYear() === year && c.getDate() === 1) label = MSHORT[c.getMonth()];
+    }
+    const ms = document.createElement('span');
+    ms.textContent = label;
+    months.appendChild(ms);
+
+    for (let d = 0; d < 7; d++){
+      const c = new Date(start); c.setDate(start.getDate() + w * 7 + d);
+      const iso = getISO(c);
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (c.getFullYear() !== year){
+        cell.classList.add('off');
+      } else {
+        const def = byDate[iso];
+        cell.style.background = heatColor(def === undefined ? null : def);
+        cell.title = ddmm(iso) + (def === undefined ? ' · kein Eintrag' : ' · ' + statText(def) + ' kcal');
+        if (iso === todayStr) cell.style.outline = '1px solid var(--ink)';
+      }
+      heat.appendChild(cell);
+    }
+  }
+  // Legendenfarben
+  [['lg1',30],['lg2',55],['lg3',78],['lg4',100]].forEach(([cls, lvl]) => {
+    document.querySelectorAll('.' + cls).forEach(el => el.style.background = `color-mix(in srgb, var(--pos) ${lvl}%, transparent)`);
+  });
+  document.querySelectorAll('.lg5').forEach(el => el.style.background = 'var(--neg)');
+}
+
+/* ---------- Trendanalyse (Perioden & Formeln unverändert) ---------- */
+function renderTrendanalyse(){
+  const list = document.getElementById('trend-list');
+  const dateLabel = document.getElementById('trend-date');
+
+  if (data.length === 0){
+    list.innerHTML = '<tr><td colspan="5" class="empty">Noch keine Daten für eine Analyse vorhanden.</td></tr>';
+    dateLabel.textContent = 'Keine Daten';
+    return;
+  }
+
+  const latestEntry = data[0];
+  const [y, m, d] = latestEntry.date.split('-');
+  dateLabel.textContent = `Letzter Datenpunkt am ${parseInt(d)}. ${MONTHS[parseInt(m) - 1]} ${y}`;
+
+  const periods = [3, 7, 14, 30, 90];
+  const today = new Date();
+  const todayStr = getISO(today);
+  const rows = [];
+
+  periods.forEach(days => {
+    let netEnergy = 0, validDaysCount = 0;
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - days + 1);
+    const startStr = getISO(startDate);
+
+    data.forEach(e => {
+      if (e.date >= startStr && e.date <= todayStr){
+        netEnergy += (e.consumed - e.targetBurn); // Überschuss +, Defizit −
+        validDaysCount++;
+      }
+    });
+
+    let displayValue = netEnergy;
+    if (window.trendMode === 'Durch' && validDaysCount > 0){
+      displayValue = Math.round(netEnergy / validDaysCount);
+    }
+    rows.push({ days, displayValue, validDaysCount });
+  });
+
+  const maxAbs = Math.max(1, ...rows.map(r => Math.abs(r.displayValue)));
+
+  list.innerHTML = rows.map(({ days, displayValue, validDaysCount }) => {
+    const surplus = displayValue > 0, deficit = displayValue < 0;
+    const cls = surplus ? 'neg' : deficit ? 'pos' : 'zeroc';
+    const sign = surplus ? '+' : deficit ? '−' : '';
+    const valueText = sign + nf.format(Math.abs(displayValue)) + ' kcal';
+    const fatText = sign + fmt2(displayValue / 7000) + ' kg';
+    const status = surplus ? 'Überschuss ↑' : deficit ? 'Defizit ↓' : 'Ausgeglichen';
+    const w = (Math.abs(displayValue) / maxAbs * 100).toFixed(1);
+    const col = surplus ? 'var(--neg)' : deficit ? 'var(--pos)' : 'var(--ink-3)';
+    return `
+      <tr>
+        <td><span class="tperiod">${String(days).padStart(2,'0')} T</span></td>
+        <td><span class="tval ${cls}">${valueText}</span><div class="tfat">${validDaysCount} Tage erfasst</div></td>
+        <td class="hide-s"><span class="tfat">${fatText}</span></td>
+        <td class="hide-s"><div class="tbar"><i style="width:${w}%;background:${col}"></i></div></td>
+        <td class="r"><span class="tstat ${cls}">${status}</span></td>
+      </tr>`;
+  }).join('');
+}
+
+/* ---------- Monatsverlauf: Stufen-Fläche + Ø7 ---------- */
+function renderChart(prefix){
+  const svg = document.getElementById('chart');
+  const xl = document.getElementById('chart-x');
+  const year = parseInt(prefix.split('-')[0]);
+  const month = parseInt(prefix.split('-')[1]);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const now = new Date();
+  const isCurrent = year === now.getFullYear() && month === now.getMonth() + 1;
+
+  const pts = [];
+  for (let i = 1; i <= daysInMonth; i++){
+    const ds = `${prefix}-${String(i).padStart(2,'0')}`;
+    const entry = data.find(e => e.date === ds);
+    if (!entry && isCurrent && i > now.getDate()) break;
+    pts.push({ i, def: entry ? (entry.targetBurn - entry.consumed) : 0 });
+  }
+
+  if (pts.length === 0){
+    svg.innerHTML = ''; xl.innerHTML = '';
+    return;
+  }
+
+  const N = pts.length, H = 100, MID = 50, AMP = 44;
+  const maxAbs = Math.max(600, ...pts.map(p => Math.abs(p.def)));
+  const yOf = v => MID - (v / maxAbs) * AMP;
+
+  // Stufenfläche
+  let area = `M0,${MID}`;
+  pts.forEach((p, k) => { area += ` L${k},${yOf(p.def)} L${k + 1},${yOf(p.def)}`; });
+  area += ` L${N},${MID} Z`;
+
+  // gleitender 7-Tage-Durchschnitt
+  let avg = '';
+  pts.forEach((p, k) => {
+    const from = Math.max(0, k - 6);
+    const slice = pts.slice(from, k + 1);
+    const m = slice.reduce((s, q) => s + q.def, 0) / slice.length;
+    avg += (k === 0 ? 'M' : ' L') + (k + 0.5) + ',' + yOf(m);
+  });
+
+  svg.setAttribute('viewBox', `0 0 ${N} ${H}`);
+  svg.innerHTML = `
+    <defs>
+      <clipPath id="clipUp"><rect x="0" y="0" width="${N}" height="${MID}"/></clipPath>
+      <clipPath id="clipDn"><rect x="0" y="${MID}" width="${N}" height="${H - MID}"/></clipPath>
+    </defs>
+    <path d="${area}" fill="var(--pos)" opacity=".26" clip-path="url(#clipUp)"/>
+    <path d="${area}" fill="var(--neg)" opacity=".26" clip-path="url(#clipDn)"/>
+    <path d="${area}" fill="none" stroke="var(--pos)" stroke-width="1.5" vector-effect="non-scaling-stroke" clip-path="url(#clipUp)"/>
+    <path d="${area}" fill="none" stroke="var(--neg)" stroke-width="1.5" vector-effect="non-scaling-stroke" clip-path="url(#clipDn)"/>
+    <line x1="0" y1="${MID}" x2="${N}" y2="${MID}" stroke="var(--ink)" stroke-width="1" opacity=".45" vector-effect="non-scaling-stroke"/>
+    <path d="${avg}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+  `;
+
+  xl.innerHTML = '';
+  for (let i = 1; i <= N; i++){
+    if (i !== 1 && i % 5 !== 0 && i !== N) continue;
+    const s = document.createElement('span');
+    s.textContent = i;
+    s.style.left = ((i - 0.5) / N * 100).toFixed(2) + '%';
+    xl.appendChild(s);
+  }
+}
+
+/* ---------- Jahr: horizontale Monatsbalken ---------- */
+function renderYearlyChart(year){
+  const host = document.getElementById('yearly-chart');
+  const monthlySums = new Array(12).fill(0);
+  const hasData = new Array(12).fill(false);
+
+  data.forEach(e => {
+    if (e.date.startsWith(year)){
+      const mIdx = parseInt(e.date.split('-')[1]) - 1;
+      monthlySums[mIdx] += (e.targetBurn - e.consumed);
+      hasData[mIdx] = true;
+    }
+  });
+
+  const maxAbs = Math.max(6000, ...monthlySums.map(Math.abs));
+  const now = new Date();
+  const pending = [];
+  host.innerHTML = '';
+
+  for (let i = 0; i < 12; i++){
+    const def = monthlySums[i];
+    const live = hasData[i] || (year == now.getFullYear() && i <= now.getMonth());
+    const row = document.createElement('div');
+    row.className = 'mrow' + (year == now.getFullYear() && i === now.getMonth() ? ' cur' : '');
+    row.innerHTML =
+      `<span class="mn">${MSHORT[i]}</span>` +
+      `<div class="mtrack"></div>` +
+      `<span class="mv ${hasData[i] ? signClass(def) : "zeroc"}">${hasData[i] ? statText(def) : "–"}</span>`;
+    if (live){
+      const bar = document.createElement('i');
+      const w = Math.abs(def) / maxAbs * 50;
+      if (def >= 0){ bar.style.left = '50%'; bar.style.background = 'var(--pos)'; }
+      else { bar.style.right = '50%'; bar.style.background = 'var(--neg)'; }
+      row.title = MONTHS[i] + ' · ' + statText(def) + ' kcal';
+      row.querySelector('.mtrack').appendChild(bar);
+      pending.push([bar, Math.max(def === 0 ? 0 : 0.6, w)]);
+    }
+    host.appendChild(row);
+  }
+  requestAnimationFrame(() => pending.forEach(([b, w]) => b.style.width = w + '%'));
+}
+
+/* ---------- Einträge ---------- */
+function renderHistory(){
+  const body = document.getElementById('history-list');
+  document.getElementById('hist-count').textContent = data.length + (data.length === 1 ? ' Eintrag' : ' Einträge');
+
+  if (data.length === 0){
+    body.innerHTML = '<tr><td colspan="6" class="empty">Noch keine Einträge.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(e => {
+    const def = e.targetBurn - e.consumed;
+    const [Y, M, D] = e.date.split('-');
+    const wd = WD[new Date(+Y, +M - 1, +D).getDay()];
+    return `
+      <tr class="erow">
+        <td><span class="eodo">${D}.${M}.${Y}</span></td>
+        <td class="hide-s"><span class="ewd">${wd}</span></td>
+        <td class="r"><span class="enum">${nf.format(e.consumed)}</span></td>
+        <td class="r"><span class="enum">${nf.format(e.targetBurn)}</span></td>
+        <td class="r"><span class="ebal ${signClass(def)}">${statText(def)}</span></td>
+        <td class="r">
+          <button class="xbtn" data-date="${e.date}" title="Löschen">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  body.querySelectorAll('.xbtn').forEach(b => {
+    b.onclick = ev => { ev.stopPropagation(); del(b.dataset.date); };
+  });
+}
+
+/* ---------- Eingabe ---------- */
+document.getElementById('kcal-form').onsubmit = e => {
+  e.preventDefault();
+  const date = document.getElementById('in-date').value;
+  const consumed = parseInt(document.getElementById('in-kcal').value);
+  const targetBurn = parseInt(document.getElementById('in-burn').value);
+  data = data.filter(d => d.date !== date);
+  data.push({ date, consumed, targetBurn });
+  update();
+  document.getElementById('in-kcal').value = '';
+  document.getElementById('in-date').value = getISO(new Date());
+  if (navigator.vibrate) navigator.vibrate(10);
+  const def = targetBurn - consumed;
+  toast(def > 0 ? nf.format(def) + ' kcal Defizit gespeichert'
+      : def < 0 ? nf.format(-def) + ' kcal Überschuss gespeichert'
+      : 'Ausgeglichen gespeichert');
+};
+
+function del(date){
+  showModal('Eintrag löschen',
+    `Möchtest du den Eintrag für den ${ddmm(date)} wirklich löschen?`,
+    'Löschen',
+    () => { data = data.filter(d => d.date !== date); update(); toast('Eintrag gelöscht'); });
+}
+
+/* ---------- Backup ---------- */
+document.getElementById('btn-export').onclick = () => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `kalorien_backup_${getISO(new Date())}.json`;
+  a.click();
+  toast('Backup exportiert');
+};
+document.getElementById('btn-import').onclick = () => document.getElementById('file-in').click();
+document.getElementById('file-in').onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      data = imported.map(item => ({
+        date: item.date,
+        consumed: item.consumed || item.kcal || 0,
+        targetBurn: item.targetBurn || item.burn || DAILY_BURN_DEFAULT
+      }));
+      update();
+      toast(data.length + ' Einträge geladen');
+    } catch (err){
+      showModal('Import-Fehler', 'Es gab einen Fehler beim Lesen der Backup-Datei. Ist das Format gültig?', 'Verstanden', null, true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+/* ---------- Dockhöhe messen ---------- */
+function syncDock(){
+  const h = document.querySelector('.dock').offsetHeight;
+  document.documentElement.style.setProperty('--dockh', h + 'px');
+}
+window.addEventListener('resize', syncDock);
+if (window.ResizeObserver) new ResizeObserver(syncDock).observe(document.querySelector('.dock'));
+syncDock();
+
+/* ---------- Start ---------- */
+document.getElementById('in-date').value = getISO(new Date());
+update();
+</script>
 </body>
 </html>
