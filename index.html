@@ -354,6 +354,82 @@ footer .fnote{ margin-left:auto; font-family:"JetBrains Mono", monospace; font-s
 }
 .toast.show{ opacity:1; transform:translate(-50%,0); }
 
+/* ==========================================================
+   12 — SEITEN & NAVIGATION
+   ========================================================== */
+.page{ display:none; }
+.page.active{ display:block; }
+.ticker[hidden]{ display:none !important; }
+.pnav{ display:flex; flex:none; border:1px solid var(--rule); }
+.pnav a{
+  font-family:"JetBrains Mono", monospace; font-size:10px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); padding:7px 12px; text-decoration:none;
+  transition:background .18s, color .18s;
+}
+.pnav a + a{ border-left:1px solid var(--rule); }
+.pnav a:hover{ color:var(--ink); }
+.pnav a.on{ background:var(--ink); color:var(--paper); }
+@media(max-width:640px){ .wordmark{ display:none; } }
+
+/* ==========================================================
+   13 — GEWICHT
+   ========================================================== */
+.facts{ border-top:1px solid var(--rule); }
+.fact{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--rule-soft); }
+.fact b{ font-family:"JetBrains Mono", monospace; font-size:9.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.fact .fr{ text-align:right; min-width:0; }
+.fact .fv{ font-size:21px; font-weight:800; letter-spacing:-.035em; font-variant-numeric:tabular-nums; line-height:1.1; }
+.fact .fs{ display:block; font-family:"JetBrains Mono", monospace; font-size:10.5px; color:var(--ink-2); margin-top:3px; }
+.fact input[type=date]{
+  border:0; border-bottom:1px solid var(--rule); background:transparent; color:var(--ink-2);
+  font-family:"JetBrains Mono", monospace; font-size:10.5px; padding:2px 0; border-radius:0;
+}
+.lnk-inline{ background:none; border:0; padding:0; cursor:pointer; font:inherit; color:var(--ink); text-decoration:underline; text-underline-offset:4px; }
+.goalbar .track .ms{ position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--paper); z-index:1; }
+
+.wchart{ position:relative; }
+.wchart svg{ display:block; width:100%; overflow:visible; touch-action:pan-y; }
+.wgrid{ stroke:var(--rule-soft); stroke-width:1; }
+.wlab{ font-family:"JetBrains Mono", monospace; font-size:9.5px; fill:var(--ink-3); letter-spacing:.04em; }
+.wlab.strong{ fill:var(--ink); font-weight:700; }
+.wtip{
+  position:absolute; z-index:5; pointer-events:none; left:0; top:0;
+  background:var(--ink); color:var(--paper); padding:7px 10px;
+  font-family:"JetBrains Mono", monospace; font-size:10.5px; line-height:1.55; white-space:nowrap;
+  transform:translate(-50%, calc(-100% - 14px)); opacity:0; transition:opacity .12s;
+}
+.wtip.show{ opacity:1; }
+.wtip b{ font-weight:700; }
+
+.msstrip{ display:flex; gap:3px; margin-bottom:20px; }
+.msstrip span{ flex:1; height:12px; background:var(--paper-3); }
+.msstrip span.done{ background:var(--ink); }
+.msstrip span.part{ background:linear-gradient(90deg, var(--ink) var(--p), var(--paper-3) var(--p)); }
+
+.wset{ display:grid; grid-template-columns:repeat(2,1fr); gap:20px 22px; }
+@media(min-width:900px){ .wset{ grid-template-columns:repeat(4,1fr) 1.8fr; } }
+.wset .span2{ grid-column:span 2; }
+@media(min-width:900px){ .wset .span2{ grid-column:auto; } }
+.dockf select{
+  width:100%; border:0; border-bottom:1px solid var(--rule); background:transparent; color:var(--ink);
+  font-family:"JetBrains Mono", monospace; font-size:13px; padding:7px 0; outline:none; border-radius:0;
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+  padding-right:18px; text-overflow:ellipsis;
+  background-image:linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position:calc(100% - 7px) 55%, calc(100% - 3px) 55%;
+  background-size:4px 4px; background-repeat:no-repeat;
+}
+.dockf select:focus{ border-bottom-color:var(--ink); }
+.dockf select option{ background:var(--paper); color:var(--ink); }
+.method-note{ font-family:"JetBrains Mono", monospace; font-size:10.5px; color:var(--ink-2); line-height:1.65; margin:16px 0 0; max-width:780px; }
+.callout{ border-left:3px solid var(--ink); padding:4px 0 4px 16px; margin-top:20px; max-width:780px; font-size:14px; line-height:1.55; color:var(--ink-2); }
+.callout strong{ color:var(--ink); }
+.dock form.w3{ grid-template-columns:1.25fr 1fr auto; }
+@media(min-width:800px){ .dock form.w3{ grid-template-columns:auto 1fr auto; } }
+.dock form.w3 .go{ padding:13px 18px; }
+.enum.pos{ color:var(--pos); } .enum.neg{ color:var(--neg); }
+@media(max-width:480px){ #w-range button{ padding:6px 8px; letter-spacing:.06em; } #page-gewicht .sec{ gap:10px; } }
+
 </style>
 </head>
 <body>
@@ -375,8 +451,17 @@ footer .fnote{ margin-left:auto; font-family:"JetBrains Mono", monospace; font-s
 <div class="mast">
   <div class="wrap">
     <div class="mark">DT</div>
-    <div class="wordmark">Defizit&nbsp;Tracker <em>/ Kalorienbilanz</em></div>
-    <div class="ticker">
+    <div class="wordmark">Defizit&nbsp;Tracker <em id="wm-sub">/ Kalorienbilanz</em></div>
+    <nav class="pnav" aria-label="Seiten">
+      <a href="#defizit" data-p="defizit" class="on">Defizit</a>
+      <a href="#gewicht" data-p="gewicht">Gewicht</a>
+    </nav>
+    <div class="ticker" id="ticker-w" hidden>
+      <div class="tick"><b>Trend</b><span class="num" id="t-w-trend">–</span></div>
+      <div class="tick"><b>7 Tage</b><span class="num" id="t-w-7">–</span></div>
+      <div class="tick"><b>Ziel am</b><span class="num" id="t-w-goal">–</span></div>
+    </div>
+    <div class="ticker" id="ticker-def">
       <div class="tick"><b>7 Tage</b><span class="num" id="t-roll">–</span></div>
       <div class="tick"><b>Monat</b><span class="num" id="t-month">–</span></div>
       <div class="tick"><b>Jahr</b><span class="num" id="t-year">–</span></div>
@@ -387,6 +472,8 @@ footer .fnote{ margin-left:auto; font-family:"JetBrains Mono", monospace; font-s
   </div>
 </div>
 
+<!-- ===================== SEITE 1: DEFIZIT ===================== -->
+<div class="page active" id="page-defizit">
 <div class="wrap">
 
   <!-- 01 WOCHE -->
@@ -550,6 +637,158 @@ footer .fnote{ margin-left:auto; font-family:"JetBrains Mono", monospace; font-s
   </form>
 </div>
 
+</div><!-- /page-defizit -->
+
+<!-- ===================== SEITE 2: GEWICHT ===================== -->
+<div class="page" id="page-gewicht">
+<div class="wrap">
+
+  <!-- 01 TRENDGEWICHT -->
+  <section>
+    <div class="sec"><span class="idx">01</span><h2>Trendgewicht</h2><span class="fill"></span><span class="meta" id="w-meta">–</span></div>
+    <div class="hero">
+      <div>
+        <span class="giant" id="w-trend"><span class="zeroc">––,–</span><sup>kg</sup></span>
+        <div class="giant-sub" id="w-sub">Noch keine Messwerte — trag unten dein heutiges Gewicht ein.</div>
+        <div class="goalbar" id="w-goalbar">
+          <div class="track" id="w-track"><div class="fill" id="w-fill"></div></div>
+          <div class="marks"><span id="w-prog">–</span><span id="w-rest">–</span></div>
+        </div>
+      </div>
+      <div class="facts" id="w-facts"></div>
+    </div>
+  </section>
+
+  <!-- 02 VERLAUF -->
+  <section>
+    <div class="sec"><span class="idx">02</span><h2>Verlauf</h2><span class="fill"></span>
+      <div class="seg" id="w-range">
+        <button data-r="1M">1M</button><button data-r="3M">3M</button><button data-r="6M">6M</button><button data-r="1J">1J</button><button data-r="Alle">Alle</button>
+      </div>
+    </div>
+    <div class="wchart" id="w-chart">
+      <svg id="w-svg" role="img" aria-label="Gewichtsverlauf mit Trendlinie"></svg>
+      <div class="wtip" id="w-tip"></div>
+    </div>
+    <div class="chart-note">
+      <em><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="var(--paper)" stroke="var(--ink-2)" stroke-width="1.2"/></svg> Waage</em>
+      <em><i class="swatch" style="background:var(--pos);height:3px"></i> Trend · tiefer als vor 30 Tagen</em>
+      <em><i class="swatch" style="background:var(--neg);height:3px"></i> höher als vor 30 Tagen</em>
+      <em><i class="swatch" style="background:repeating-linear-gradient(90deg,var(--ink-3) 0 4px,transparent 4px 7px)"></i> Prognose</em>
+    </div>
+  </section>
+
+  <!-- 03 VERÄNDERUNG -->
+  <section>
+    <div class="sec"><span class="idx">03</span><h2>Veränderung</h2><span class="fill"></span><span class="meta" id="w-ch-meta">Trend</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:76px">Zeitraum</th>
+          <th>Δ Trend</th>
+          <th class="hide-s">Tempo</th>
+          <th class="hide-s">≙ Bilanz</th>
+          <th class="r">Richtung</th>
+        </tr>
+      </thead>
+      <tbody id="w-changes"></tbody>
+    </table>
+  </section>
+
+  <!-- 04 MEILENSTEINE -->
+  <section>
+    <div class="sec"><span class="idx">04</span><h2>Meilensteine</h2><span class="fill"></span><span class="meta" id="w-ms-meta">–</span></div>
+    <div class="msstrip" id="w-msstrip"></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:76px">Etappe</th>
+          <th>Gewicht</th>
+          <th class="hide-s">Abstand</th>
+          <th class="r">Status</th>
+        </tr>
+      </thead>
+      <tbody id="w-ms"></tbody>
+    </table>
+  </section>
+
+  <!-- 05 ABGLEICH -->
+  <section>
+    <div class="sec"><span class="idx">05</span><h2>Abgleich mit Defizit</h2><span class="fill"></span><span class="meta">Log vs. Waage</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:76px">Zeitraum</th>
+          <th>Log Ø / Tag</th>
+          <th class="hide-s">Erwartet</th>
+          <th class="hide-s">Trend</th>
+          <th class="r">Abweichung / Tag</th>
+        </tr>
+      </thead>
+      <tbody id="w-check"></tbody>
+    </table>
+    <div class="callout" id="w-check-note"></div>
+  </section>
+
+  <!-- 06 MESSUNGEN -->
+  <section>
+    <div class="sec"><span class="idx">06</span><h2>Messungen</h2><span class="fill"></span><span class="meta" id="w-count">0</span></div>
+    <div class="entries">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:104px">Datum</th>
+            <th class="hide-s" style="width:44px">Tag</th>
+            <th class="r">Waage</th>
+            <th class="r">Trend</th>
+            <th class="r">Abw.</th>
+            <th style="width:34px"></th>
+          </tr>
+        </thead>
+        <tbody id="w-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 EINSTELLUNGEN -->
+  <section id="w-settings">
+    <div class="sec"><span class="idx">07</span><h2>Einstellungen</h2><span class="fill"></span><span class="meta">lokal gespeichert</span></div>
+    <div class="wset">
+      <div class="dockf"><label for="w-goal">Zielgewicht · kg</label><input type="text" inputmode="decimal" id="w-goal" placeholder="z. B. 78" autocomplete="off"></div>
+      <div class="dockf"><label for="w-start">Startgewicht · kg</label><input type="text" inputmode="decimal" id="w-start" placeholder="auto" autocomplete="off"></div>
+      <div class="dockf"><label for="w-height">Größe · cm</label><input type="text" inputmode="numeric" id="w-height" placeholder="für BMI" autocomplete="off"></div>
+      <div class="dockf"><label for="w-step">Meilenstein alle</label>
+        <select id="w-step"><option value="1">1 kg</option><option value="2">2 kg</option><option value="2.5">2,5 kg</option><option value="5">5 kg</option></select>
+      </div>
+      <div class="dockf span2"><label for="w-method">Trend-Berechnung</label><select id="w-method"></select></div>
+    </div>
+    <p class="method-note" id="w-method-note"></p>
+  </section>
+
+  <footer>
+    <button class="lnk" id="w-export">Backup Gewicht speichern</button>
+    <input type="file" id="w-file" style="display:none" accept=".json,.csv,.txt">
+    <button class="lnk" id="w-import">Import · JSON / CSV</button>
+    <span class="fnote">Trend: <span id="w-fnote">Kalman-Glätter</span> · 1 kg ≙ 7.000 kcal</span>
+  </footer>
+</div>
+
+<!-- ENTRY DOCK · GEWICHT -->
+<div class="dock">
+  <form id="w-form" class="w3">
+    <div class="dockf">
+      <label for="w-in-date">Datum</label>
+      <input type="date" id="w-in-date" required>
+    </div>
+    <div class="dockf">
+      <label for="w-in-kg">Gewicht · kg</label>
+      <input type="text" inputmode="decimal" id="w-in-kg" placeholder="84,5" required autocomplete="off">
+    </div>
+    <button type="submit" class="go">Eintragen</button>
+  </form>
+</div>
+</div><!-- /page-gewicht -->
+
 <script>
 /* ============================================================
    DATEN — unverändert gegenüber der Ursprungsversion
@@ -579,6 +818,7 @@ const WD = ['So','Mo','Di','Mi','Do','Fr','Sa'];
     else { document.documentElement.removeAttribute('data-theme'); localStorage.removeItem('tracker_theme'); }
     toast(next === 'dark' ? 'Dunkel' : next === 'light' ? 'Hell' : 'System');
     update();
+    renderWeight();
   };
 })();
 
@@ -1101,16 +1341,758 @@ document.getElementById('file-in').onchange = e => {
 
 /* ---------- Dockhöhe messen ---------- */
 function syncDock(){
-  const h = document.querySelector('.dock').offsetHeight;
-  document.documentElement.style.setProperty('--dockh', h + 'px');
+  const d = document.querySelector('.page.active .dock');
+  if (d) document.documentElement.style.setProperty('--dockh', d.offsetHeight + 'px');
 }
 window.addEventListener('resize', syncDock);
-if (window.ResizeObserver) new ResizeObserver(syncDock).observe(document.querySelector('.dock'));
+if (window.ResizeObserver) document.querySelectorAll('.dock').forEach(d => new ResizeObserver(syncDock).observe(d));
 syncDock();
+
+
+/* ============================================================
+   SEITE 2 — GEWICHT
+   Eigene Daten (weight_tracker_v1) — die Defizit-Daten bleiben unberührt.
+   ============================================================ */
+const W_KEY = 'weight_tracker_v1';
+const W_SET_KEY = 'weight_settings_v1';
+const KCAL_PER_KG = 7000; // gleiche Umrechnung wie auf der Defizit-Seite
+
+function wRead(k, fb){ try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e){ return fb; } }
+let wData = wRead(W_KEY, []);
+let wSet = Object.assign({ goal:null, start:null, height:null, step:2, method:'kalman' }, wRead(W_SET_KEY, {}));
+let wRange = localStorage.getItem('weight_range') || '3M';
+let wWish = localStorage.getItem('weight_wish') || '';
+let wModelCache = null;
+let wChartState = null;
+
+const TREND_METHODS = {
+  kalman: {
+    label: 'Kalman-Glätter (empfohlen)', short: 'Kalman-Glätter',
+    note: 'Nachbau des Happy-Scale-Prinzips: Ein Zustandsmodell aus Gewicht und Tempo wird vorwärts gefiltert und danach rückwärts geglättet (Rauch-Tung-Striebel). Spätere Messungen korrigieren so frühere Trendwerte — die letzten Tage können sich noch leicht verschieben, wenn neue Werte dazukommen. Kein Nachlauf bei stetiger Abnahme, Lücken zählen mit ihrem echten Zeitabstand.'
+  },
+  holt: {
+    label: 'Doppelt exponentiell (Holt)', short: 'Holt',
+    note: 'Exponentielle Glättung mit zusätzlichem Tempo-Term (α = 0,1 · β = 0,1, entspricht TrendWeight „Holt standard“). Nutzt nur vergangene Werte. Weniger Nachlauf als die einfache Glättung, schießt bei Tempowechseln etwas über.'
+  },
+  ema: {
+    label: 'Exponentiell 10 % (Hacker’s Diet)', short: 'EMA 10 %',
+    note: 'Klassiker aus The Hacker’s Diet und Standard bei TrendWeight: Trend += 10 % × (Messung − Trend), fehlende Tage linear aufgefüllt. Sehr ruhig, läuft bei stetiger Abnahme aber gut eine Woche hinterher.'
+  },
+  sma: {
+    label: 'Gleitender Ø 7 Tage', short: '7-Tage-Ø',
+    note: 'Einfacher Durchschnitt aller Messungen der letzten 7 Kalendertage. Leicht nachvollziehbar, läuft etwa 3–4 Tage hinterher.'
+  }
+};
+
+/* ---------- Helfer ---------- */
+const wf1 = n => n.toFixed(1).replace('.', ',');
+const wf2 = n => n.toFixed(2).replace('.', ',');
+const wSign = n => n > 0 ? '+' : n < 0 ? '−' : '±';
+const wkg = (n, d = 2) => wSign(Math.abs(n) < Math.pow(10, -d) / 2 ? 0 : n) + Math.abs(n).toFixed(d).replace('.', ',');
+const wIsoToT = iso => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+const wTToIso = t => new Date(Math.round(t) * 864e5).toISOString().slice(0, 10);
+const wToday = () => wIsoToT(getISO(new Date()));
+const wDateShort = iso => { const [y, m, d] = iso.split('-'); return `${parseInt(d)}. ${MSHORT[+m - 1]} ${y}`; };
+const wWd = iso => { const [y, m, d] = iso.split('-').map(Number); return WD[new Date(y, m - 1, d).getDay()]; };
+function wNum(v){ const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) && n > 0 ? n : null; }
+function wSpan(days){
+  if (days < 1) return 'heute';
+  if (days < 14) return Math.round(days) + (Math.round(days) === 1 ? ' Tag' : ' Tagen');
+  if (days < 120) return Math.round(days / 7) + ' Wochen';
+  return (days / 30.44).toFixed(1).replace('.', ',') + ' Monaten';
+}
+function wBal(ratePerDay){ const v = Math.round(ratePerDay * KCAL_PER_KG); return (v < 0 ? '−' : v > 0 ? '+' : '±') + nf.format(Math.abs(v)); }
+
+/* ============================================================
+   TREND-ALGORITHMEN
+   ============================================================ */
+
+// Kalman-Filter + Rauch-Tung-Striebel-Glätter, lokales lineares Trendmodell.
+// Zustand x = [Gewicht, Tempo kg/Tag]. Unregelmäßige Abstände über dt.
+function wKalman(pts){
+  const R  = 0.30;    // Messrauschen (kg²) — Tagesschwankung ~0,55 kg
+  const QL = 0.002;   // Drift des Niveaus pro Tag (kg²)
+  const QA = 0.00002; // Drift des Tempos pro Tag
+  const n = pts.length;
+  const xf = [], Pf = [], xp = [], Pp = [], dts = [];
+  let x = [pts[0].y, 0], P = [[R, 0], [0, 0.0025]];
+  for (let k = 0; k < n; k++){
+    let xpk, Ppk;
+    if (k === 0){ xpk = x.slice(); Ppk = [P[0].slice(), P[1].slice()]; dts.push(0); }
+    else {
+      const dt = Math.max(pts[k].t - pts[k - 1].t, 1e-6); dts.push(dt);
+      xpk = [x[0] + dt * x[1], x[1]];
+      const a = P[0][0], b = P[0][1], c = P[1][0], d = P[1][1];
+      Ppk = [[a + dt * (b + c) + dt * dt * d + QL * dt + QA * dt * dt * dt / 3, b + dt * d + QA * dt * dt / 2],
+             [c + dt * d + QA * dt * dt / 2, d + QA * dt]];
+    }
+    const S = Ppk[0][0] + R, K0 = Ppk[0][0] / S, K1 = Ppk[1][0] / S, inn = pts[k].y - xpk[0];
+    x = [xpk[0] + K0 * inn, xpk[1] + K1 * inn];
+    P = [[Ppk[0][0] - K0 * Ppk[0][0], Ppk[0][1] - K0 * Ppk[0][1]],
+         [Ppk[1][0] - K1 * Ppk[0][0], Ppk[1][1] - K1 * Ppk[0][1]]];
+    xf.push(x); Pf.push(P); xp.push(xpk); Pp.push(Ppk);
+  }
+  const xs = new Array(n); xs[n - 1] = xf[n - 1];
+  for (let k = n - 2; k >= 0; k--){
+    const dt = dts[k + 1], P = Pf[k], Q = Pp[k + 1];
+    const m00 = P[0][0] + P[0][1] * dt, m01 = P[0][1], m10 = P[1][0] + P[1][1] * dt, m11 = P[1][1];
+    const det = Q[0][0] * Q[1][1] - Q[0][1] * Q[1][0];
+    const i00 = Q[1][1] / det, i01 = -Q[0][1] / det, i10 = -Q[1][0] / det, i11 = Q[0][0] / det;
+    const C00 = m00 * i00 + m01 * i10, C01 = m00 * i01 + m01 * i11, C10 = m10 * i00 + m11 * i10, C11 = m10 * i01 + m11 * i11;
+    const d0 = xs[k + 1][0] - xp[k + 1][0], d1 = xs[k + 1][1] - xp[k + 1][1];
+    xs[k] = [xf[k][0] + C00 * d0 + C01 * d1, xf[k][1] + C10 * d0 + C11 * d1];
+  }
+  return xs.map(v => ({ level: v[0], slope: v[1] }));
+}
+
+// Holt / EMA auf täglich linear aufgefüllter Reihe (wie TrendWeight). beta = 0 → Hacker's Diet.
+function wHolt(pts, alpha, beta){
+  const m = new Map();
+  let L = pts[0].y, S = 0;
+  m.set(pts[0].t, { level: L, slope: S });
+  for (let k = 1; k < pts.length; k++){
+    const a = pts[k - 1], b = pts[k];
+    for (let t = a.t + 1; t <= b.t; t++){
+      const y = a.y + (b.y - a.y) * (t - a.t) / (b.t - a.t);
+      const f = L + S, nl = f + alpha * (y - f);
+      S = S + beta * ((nl - L) - S); L = nl;
+      m.set(t, { level: L, slope: beta ? S : null });
+    }
+  }
+  return pts.map(p => m.get(p.t));
+}
+
+function wSma(pts){
+  return pts.map(p => {
+    const w = pts.filter(q => q.t > p.t - 7 && q.t <= p.t);
+    return { level: w.reduce((s, q) => s + q.y, 0) / w.length, slope: null };
+  });
+}
+
+function wComputeTrend(pts, method){
+  if (!pts.length) return [];
+  if (method === 'holt') return wHolt(pts, 0.1, 0.1);
+  if (method === 'ema')  return wHolt(pts, 0.1, 0);
+  if (method === 'sma')  return wSma(pts);
+  return wKalman(pts);
+}
+
+/* ---------- Modell ---------- */
+function wTrendAt(pts, t){
+  if (!pts.length || t < pts[0].t) return null;
+  const n = pts.length;
+  if (t >= pts[n - 1].t) return pts[n - 1].trend;
+  let i = 1; while (pts[i].t < t) i++;
+  const a = pts[i - 1], b = pts[i];
+  return a.trend + (b.trend - a.trend) * (t - a.t) / (b.t - a.t);
+}
+
+function wRate(pts){
+  if (pts.length < 2) return null;
+  const last = pts[pts.length - 1];
+  if (wSet.method === 'kalman') return last.slope;
+  let win = pts.filter(p => p.t >= last.t - 28);
+  if (win.length < 2 || last.t - win[0].t < 7) win = pts;
+  if (win.length < 2 || last.t - win[0].t < 3) return null;
+  const mt = win.reduce((s, p) => s + p.t, 0) / win.length, my = win.reduce((s, p) => s + p.trend, 0) / win.length;
+  let num = 0, den = 0; win.forEach(p => { num += (p.t - mt) * (p.trend - my); den += (p.t - mt) ** 2; });
+  return den ? num / den : null;
+}
+
+function wModel(){
+  const asc = wData.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const pts = asc.map(e => ({ date: e.date, t: wIsoToT(e.date), y: e.kg }));
+  wComputeTrend(pts, wSet.method).forEach((r, i) => { pts[i].trend = r.level; pts[i].slope = r.slope; });
+  const last = pts.length ? pts[pts.length - 1] : null;
+  const start = wSet.start != null ? wSet.start : (pts.length ? pts[0].trend : null);
+  const goal = wSet.goal;
+  const dir = (goal != null && start != null && goal !== start) ? Math.sign(goal - start) : -1;
+  return { pts, last, start, goal, dir, rate: wRate(pts) };
+}
+
+function wDelta(m, days){ const a = wTrendAt(m.pts, m.last.t - days); return a == null ? null : m.last.trend - a; }
+function wCls(m, delta){ const d = m.dir * delta; return d > 0.02 ? 'pos' : d < -0.02 ? 'neg' : 'zeroc'; }
+function wReachedAt(m, target){ return m.pts.find(p => m.dir * (p.trend - target) >= 0) || null; }
+
+function wPredict(m, target){
+  if (!m.last) return { state: 'none' };
+  if (m.dir * (m.last.trend - target) >= 0) return { state: 'reached' };
+  if (m.rate == null) return { state: 'none' };
+  if (m.dir * m.rate <= 0.002) return { state: 'away' };
+  const days = (target - m.last.trend) / m.rate;
+  if (days > 3 * 365) return { state: 'far', days };
+  return { state: 'eta', t: m.last.t + days, days };
+}
+
+function wMilestones(start, goal, step){
+  const dir = Math.sign(goal - start);
+  if (!dir) return [goal];
+  const out = [];
+  let v = dir < 0 ? Math.floor(start / step) * step : Math.ceil(start / step) * step;
+  if (Math.abs(v - start) < 1e-9) v += dir * step;
+  while (dir * (goal - v) > 1e-9 && out.length < 200){ out.push(+v.toFixed(3)); v += dir * step; }
+  out.push(goal);
+  return out;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function wFact(label, value, sub, cls){
+  return `<div class="fact"><b>${label}</b><div class="fr"><span class="fv ${cls || ''}">${value}</span><span class="fs">${sub || ''}</span></div></div>`;
+}
+
+function renderWHero(m){
+  const big = document.getElementById('w-trend');
+  const gb = document.getElementById('w-goalbar');
+  const facts = document.getElementById('w-facts');
+  document.getElementById('w-meta').textContent = m.last ? 'Stand ' + ddmm(m.last.date) : 'keine Daten';
+
+  if (!m.last){
+    big.innerHTML = '<span class="zeroc">––,–</span><sup>kg</sup>';
+    document.getElementById('w-sub').textContent = 'Noch keine Messwerte — trag unten dein heutiges Gewicht ein.';
+    gb.style.display = 'none';
+    facts.innerHTML = wFact('Tipp', 'Täglich wiegen', 'morgens, nach dem Aufstehen — der Trend glättet den Rest');
+    return;
+  }
+
+  big.innerHTML = wf1(m.last.trend) + '<sup>kg</sup>';
+  const d7 = wDelta(m, 7);
+  document.getElementById('w-sub').innerHTML =
+    `Trendgewicht · Waage ${wf1(m.last.y)} kg am ${ddmm(m.last.date)}` +
+    (d7 != null ? ` · 7 T <span class="${wCls(m, d7)}">${wkg(d7)} kg</span>` : '');
+
+  // Fortschritt Start → Ziel
+  const track = document.getElementById('w-track');
+  track.querySelectorAll('.ms').forEach(e => e.remove());
+  gb.style.display = '';
+  if (m.goal != null && m.start != null && m.goal !== m.start){
+    const total = m.goal - m.start, done = m.last.trend - m.start;
+    const p = Math.max(0, Math.min(1, done / total));
+    document.getElementById('w-fill').style.width = (p * 100) + '%';
+    gb.classList.toggle('hit', p >= 1);
+    wMilestones(m.start, m.goal, wSet.step).slice(0, -1).forEach(v => {
+      const i = document.createElement('i'); i.className = 'ms';
+      i.style.left = ((v - m.start) / total * 100) + '%';
+      track.appendChild(i);
+    });
+    document.getElementById('w-prog').textContent = `${Math.round(p * 100)} % · ${wkg(Math.abs(done) < 0.05 ? 0 : done, 1)} von ${wkg(total, 1)} kg`;
+    const rem = Math.abs(m.goal - m.last.trend);
+    document.getElementById('w-rest').textContent = p >= 1 ? `Ziel ${wf1(m.goal)} kg erreicht` : `noch ${wf1(rem)} kg bis ${wf1(m.goal)}`;
+  } else {
+    document.getElementById('w-fill').style.width = '0%';
+    gb.classList.remove('hit');
+    document.getElementById('w-prog').textContent = 'Kein Zielgewicht gesetzt';
+    document.getElementById('w-rest').innerHTML = '<button class="lnk-inline" data-go="settings">Ziel festlegen</button>';
+  }
+
+  // Fakten & Prognosen
+  let h = '';
+  if (m.goal == null){
+    h += wFact('Ziel', '<button class="lnk-inline" data-go="settings">festlegen</button>', 'Einstellungen · Abschnitt 07');
+  } else {
+    const pr = wPredict(m, m.goal), lab = `Ziel ${wf1(m.goal)} kg`;
+    if (pr.state === 'reached'){ const r = wReachedAt(m, m.goal); h += wFact(lab, 'erreicht', r ? 'erstmals am ' + ddmm(r.date) : '', 'pos'); }
+    else if (pr.state === 'eta'){ const iso = wTToIso(pr.t); h += wFact(lab, wDateShort(iso), `in ${wSpan(Math.max(0, pr.t - wToday()))} · noch ${wf1(Math.abs(m.goal - m.last.trend))} kg`); }
+    else if (pr.state === 'far') h += wFact(lab, '> 3 Jahre', 'beim aktuellen Tempo');
+    else if (pr.state === 'away') h += wFact(lab, 'offen', 'der Trend läuft gerade vom Ziel weg', 'neg');
+    else h += wFact(lab, '–', 'mind. 2 Messungen nötig');
+  }
+  if (m.rate != null){
+    h += wFact('Tempo', `${wkg(m.rate * 7)} kg/Wo`, `≙ ${wBal(m.rate)} kcal/Tag Bilanz`, wCls(m, m.rate));
+    const now = new Date(), fom = getISO(new Date(now.getFullYear(), now.getMonth() + 1, 1)), tF = wIsoToT(fom);
+    const vF = m.last.trend + m.rate * (tF - m.last.t);
+    h += wFact(`Prognose ${wDateShort(fom).replace(/ \d{4}$/, '')}`, `${wf1(vF)} kg`, `${wkg(vF - m.last.trend, 1)} kg ggü. aktuellem Trend`);
+  }
+  // Wunschdatum (Happy Scale: „Was wiege ich am …?“)
+  let wishVal = '–', wishSub = '';
+  if (wWish){
+    const tW = wIsoToT(wWish);
+    if (tW <= m.last.t){ const v = wTrendAt(m.pts, tW); if (v != null){ wishVal = wf1(v) + ' kg'; wishSub = 'Trend damals'; } }
+    else if (m.rate != null){ wishVal = wf1(m.last.trend + m.rate * (tW - m.last.t)) + ' kg'; wishSub = 'bei aktuellem Tempo'; }
+  }
+  h += `<div class="fact"><b>Prognose am</b><div class="fr"><span class="fv">${wishVal}</span><span class="fs"><input type="date" id="w-wish" value="${wWish}" aria-label="Datum für Prognose"> ${wishSub}</span></div></div>`;
+  // Bestwert der letzten 10 Tage (Happy Scale)
+  const recent = m.pts.filter(p => p.t > wToday() - 10);
+  if (recent.length){ const b = recent.reduce((a, p) => p.y < a.y ? p : a); h += wFact('Bestwert 10 T', wf1(b.y) + ' kg', 'Waage am ' + ddmm(b.date)); }
+  if (wSet.height){
+    const bmi = m.last.trend / Math.pow(wSet.height / 100, 2);
+    const cat = bmi < 18.5 ? 'Untergewicht' : bmi < 25 ? 'Normalgewicht' : bmi < 30 ? 'Übergewicht' : 'Adipositas';
+    h += wFact('BMI · Trend', bmi.toFixed(1).replace('.', ','), cat + ' (WHO)');
+  }
+  facts.innerHTML = h;
+  document.getElementById('w-wish').onchange = e => {
+    wWish = e.target.value;
+    try { localStorage.setItem('weight_wish', wWish); } catch (err){}
+    renderWHero(wModelCache);
+  };
+}
+
+function renderWTicker(m){
+  const tr = document.getElementById('t-w-trend'), t7 = document.getElementById('t-w-7'), tg = document.getElementById('t-w-goal');
+  if (!m.last){ tr.textContent = t7.textContent = tg.textContent = '–'; return; }
+  tr.textContent = wf1(m.last.trend) + ' kg';
+  const d7 = wDelta(m, 7);
+  t7.className = 'num ' + (d7 == null ? 'zeroc' : wCls(m, d7));
+  t7.textContent = d7 == null ? '–' : wkg(d7) + ' kg';
+  const pr = m.goal != null ? wPredict(m, m.goal) : { state: 'none' };
+  tg.textContent = pr.state === 'eta' ? ddmm(wTToIso(pr.t)) : pr.state === 'reached' ? 'erreicht' : '–';
+}
+
+/* ---------- Diagramm ---------- */
+function renderWChart(m){
+  const host = document.getElementById('w-chart'), svg = document.getElementById('w-svg');
+  document.querySelectorAll('#w-range button').forEach(b => b.classList.toggle('on', b.dataset.r === wRange));
+  const W = host.clientWidth; if (!W) return;
+  const H = W < 600 ? 240 : 310, ML = 2, MR = 48, MT = 16, MB = 28;
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  document.getElementById('w-tip').classList.remove('show');
+  if (!m.last){
+    svg.innerHTML = `<line x1="${ML}" x2="${W - MR}" y1="${H - MB}" y2="${H - MB}" stroke="var(--rule)"/><text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="wlab">NOCH KEINE MESSWERTE</text>`;
+    wChartState = null; return;
+  }
+
+  const spans = { '1M': 30, '3M': 91, '6M': 182, '1J': 365 };
+  const tEnd = Math.max(m.last.t, wToday());
+  let t0 = spans[wRange] ? Math.max(m.pts[0].t, tEnd - spans[wRange]) : m.pts[0].t;
+  if (tEnd - t0 < 7) t0 = tEnd - 7;
+  const moving = m.rate != null && Math.abs(m.rate) > 0.002;
+  const t1 = tEnd + (moving ? Math.max(4, (tEnd - t0) * 0.16) : 1);
+  const pr = m.goal != null ? wPredict(m, m.goal) : { state: 'none' };
+  const projT = moving ? (pr.state === 'eta' ? Math.min(t1, pr.t) : t1) : null;
+  const projY = moving ? m.last.trend + m.rate * (projT - m.last.t) : null;
+
+  const vis = m.pts.filter(p => p.t >= t0 && p.t <= t1);
+  const i0 = m.pts.findIndex(p => p.t >= t0);
+  const line = (i0 > 0 ? [m.pts[i0 - 1]] : []).concat(vis);
+
+  let ys = vis.flatMap(p => [p.y, p.trend]);
+  if (!ys.length) ys = [m.last.trend];
+  if (moving) ys.push(projY);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  if (m.goal != null && m.goal >= lo - 1.5 && m.goal <= hi + 1.5){ lo = Math.min(lo, m.goal); hi = Math.max(hi, m.goal); }
+  if (hi - lo < 1){ const c = (hi + lo) / 2; lo = c - 0.5; hi = c + 0.5; }
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+
+  const X = t => ML + (t - t0) / (t1 - t0) * (W - ML - MR);
+  const Y = v => MT + (hi - v) / (hi - lo) * (H - MT - MB);
+  const r1 = n => Math.round(n * 10) / 10;
+  let s = `<defs><clipPath id="wclip"><rect x="${ML}" y="0" width="${W - ML - MR}" height="${H}"/></clipPath></defs>`;
+
+  // Zukunftszone
+  const xNow = r1(X(tEnd));
+  if (W - MR - xNow > 2){
+    s += `<rect x="${xNow}" y="${MT}" width="${r1(W - MR - xNow)}" height="${H - MT - MB}" fill="var(--paper-2)"/>`;
+    if (W - MR - xNow > 70) s += `<text x="${xNow + 6}" y="${MT + 11}" class="wlab">PROGNOSE</text>`;
+  }
+
+  // y-Raster
+  const steps = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 50];
+  const st = steps.find(v => (hi - lo) / v <= 6) || 100;
+  const dec = st === 0.25 ? 2 : st < 1 || st === 2.5 ? 1 : 0;
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + 1e-9; v += st){
+    const y = r1(Y(v));
+    s += `<line x1="${ML}" x2="${W - MR}" y1="${y}" y2="${y}" class="wgrid"/><text x="${W - MR + 8}" y="${y + 3}" class="wlab">${v.toFixed(dec).replace('.', ',')}</text>`;
+  }
+
+  // x-Achse
+  const span = t1 - t0, xt = [];
+  if (span <= 50){
+    for (let t = Math.ceil(t0); t <= t1; t++) if (new Date(t * 864e5).getUTCDay() === 1) xt.push([t, ddmm(wTToIso(t)).slice(0, 5)]);
+  } else {
+    const every = span > 1000 ? 6 : span > 420 ? 3 : span > 210 ? 2 : 1;
+    const d0 = new Date(t0 * 864e5);
+    let y = d0.getUTCFullYear(), mo = d0.getUTCMonth() + 1;
+    for (let guard = 0; guard < 200; guard++){
+      if (mo > 11){ mo = 0; y++; }
+      const t = Date.UTC(y, mo, 1) / 864e5;
+      if (t > t1) break;
+      if (mo % every === 0) xt.push([t, mo === 0 ? `${MSHORT[0]} ’${String(y).slice(2)}` : MSHORT[mo]]);
+      mo++;
+    }
+  }
+  s += `<line x1="${ML}" x2="${W - MR}" y1="${H - MB}" y2="${H - MB}" stroke="var(--rule)"/>`;
+  xt.forEach(([t, lab]) => {
+    const x = r1(X(t)); if (x < ML + 12 || x > W - MR - 12) return;
+    s += `<line x1="${x}" x2="${x}" y1="${H - MB}" y2="${H - MB + 4}" stroke="var(--rule)"/><text x="${x}" y="${H - MB + 17}" text-anchor="middle" class="wlab">${lab}</text>`;
+  });
+
+  // Meilensteine & Ziel
+  if (m.goal != null && m.start != null){
+    wMilestones(m.start, m.goal, wSet.step).slice(0, -1).forEach(v => {
+      if (v > lo && v < hi){ const y = r1(Y(v)); s += `<line x1="${ML}" x2="${W - MR}" y1="${y}" y2="${y}" stroke="var(--ink-3)" stroke-dasharray="1 4" opacity=".8"/>`; }
+    });
+    if (m.goal > lo && m.goal < hi){
+      const y = r1(Y(m.goal));
+      s += `<line x1="${ML}" x2="${W - MR}" y1="${y}" y2="${y}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="6 4"/><text x="${ML + 4}" y="${y - 6}" class="wlab strong">ZIEL ${wf1(m.goal)}</text>`;
+    }
+  }
+
+  let g = '';
+  // Abweichung Waage ↔ Trend (Sinker grün, Floater rot)
+  vis.forEach(p => {
+    const x = r1(X(p.t)), good = m.dir * (p.y - p.trend) > 0;
+    g += `<line x1="${x}" x2="${x}" y1="${r1(Y(p.y))}" y2="${r1(Y(p.trend))}" stroke="${good ? 'var(--pos)' : 'var(--neg)'}" opacity=".55"/>`;
+  });
+  // Trendlinie, eingefärbt im Vergleich zu 30 Tagen zuvor (Happy Scale)
+  const tone = p => { const b = wTrendAt(m.pts, p.t - 30); if (b == null) return 'var(--ink)'; const d = m.dir * (p.trend - b); return d > 0.05 ? 'var(--pos)' : d < -0.05 ? 'var(--neg)' : 'var(--ink)'; };
+  for (let i = 1; i < line.length; i++){
+    const a = line[i - 1], b = line[i];
+    g += `<line x1="${r1(X(a.t))}" y1="${r1(Y(a.trend))}" x2="${r1(X(b.t))}" y2="${r1(Y(b.trend))}" stroke="${tone(b)}" stroke-width="2.4" stroke-linecap="round"/>`;
+  }
+  vis.forEach(p => { g += `<circle cx="${r1(X(p.t))}" cy="${r1(Y(p.y))}" r="2.6" fill="var(--paper)" stroke="var(--ink-2)" stroke-width="1.2"/>`; });
+  // Prognose
+  if (moving){
+    g += `<line x1="${r1(X(m.last.t))}" y1="${r1(Y(m.last.trend))}" x2="${r1(X(projT))}" y2="${r1(Y(projY))}" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    if (pr.state === 'eta' && pr.t <= t1){
+      const x = r1(X(pr.t)), y = r1(Y(m.goal));
+      g += `<circle cx="${x}" cy="${y}" r="4" fill="var(--acid)" stroke="var(--ink)" stroke-width="1.2"/><text x="${x}" y="${y + 17}" text-anchor="middle" class="wlab strong">${ddmm(wTToIso(pr.t)).slice(0, 5)}</text>`;
+    }
+  }
+  g += `<circle cx="${r1(X(m.last.t))}" cy="${r1(Y(m.last.trend))}" r="4.5" fill="var(--acid)" stroke="var(--ink)" stroke-width="1.4"/>`;
+  s += `<g clip-path="url(#wclip)">${g}</g>`;
+  s += `<g id="w-hover" style="display:none"><line id="w-hl" y1="${MT}" y2="${H - MB}" stroke="var(--ink)" opacity=".35"/><circle id="w-hc" r="5" fill="none" stroke="var(--ink)" stroke-width="1.5"/></g>`;
+  svg.innerHTML = s;
+  wChartState = { vis, X, Y, W };
+}
+
+function wHover(e){
+  const st = wChartState; if (!st || !st.vis.length) return;
+  const svg = document.getElementById('w-svg'), x = e.clientX - svg.getBoundingClientRect().left;
+  let best = st.vis[0], bd = Infinity;
+  st.vis.forEach(p => { const d = Math.abs(st.X(p.t) - x); if (d < bd){ bd = d; best = p; } });
+  const px = st.X(best.t), py = st.Y(best.trend);
+  document.getElementById('w-hover').style.display = '';
+  const hl = document.getElementById('w-hl'); hl.setAttribute('x1', px); hl.setAttribute('x2', px);
+  const hc = document.getElementById('w-hc'); hc.setAttribute('cx', px); hc.setAttribute('cy', py);
+  const tip = document.getElementById('w-tip');
+  const dev = best.y - best.trend;
+  tip.innerHTML = `${wWd(best.date)} ${ddmm(best.date)}<br>Waage <b>${wf1(best.y)} kg</b><br>Trend <b>${wf2(best.trend)} kg</b> · ${wkg(dev, 1)}`;
+  tip.style.left = Math.max(80, Math.min(st.W - 80, px)) + 'px';
+  tip.style.top = Math.min(py, st.Y(best.y)) + 'px';
+  tip.classList.add('show');
+}
+function wHoverEnd(){
+  const h = document.getElementById('w-hover'); if (h) h.style.display = 'none';
+  document.getElementById('w-tip').classList.remove('show');
+}
+
+/* ---------- Veränderung ---------- */
+function renderWChanges(m){
+  const body = document.getElementById('w-changes');
+  if (!m.last){ body.innerHTML = '<tr><td colspan="5" class="empty">Noch keine Messwerte.</td></tr>'; return; }
+  document.getElementById('w-ch-meta').textContent = 'Trend bis ' + ddmm(m.last.date);
+  const periods = [[7, '7 T'], [14, '14 T'], [30, '30 T'], [90, '90 T'], [182, '6 Mon'], [365, '1 Jahr'], ['all', 'Gesamt']];
+  body.innerHTML = periods.map(([p, label]) => {
+    let N, a, fromIso;
+    if (p === 'all'){ N = m.last.t - m.pts[0].t; a = m.pts[0].trend; fromIso = m.pts[0].date; }
+    else { N = p; a = wTrendAt(m.pts, m.last.t - p); fromIso = wTToIso(m.last.t - p); }
+    if (a == null || N < 1){
+      return `<tr><td><span class="tperiod">${label}</span></td><td><span class="tval zeroc">–</span><div class="tfat">zu wenig Verlauf</div></td><td class="hide-s"></td><td class="hide-s"></td><td class="r"></td></tr>`;
+    }
+    const delta = m.last.trend - a, cls = wCls(m, delta);
+    const dirTxt = delta < -0.05 ? 'Abnahme ↓' : delta > 0.05 ? 'Zunahme ↑' : 'Stabil';
+    return `<tr>
+      <td><span class="tperiod">${label}</span></td>
+      <td><span class="tval ${cls}">${wkg(delta)} kg</span><div class="tfat">${ddmm(fromIso)} → ${ddmm(m.last.date)}</div></td>
+      <td class="hide-s"><span class="tfat">${wkg(delta / N * 7)} kg/Wo</span></td>
+      <td class="hide-s"><span class="tfat">${wBal(delta / N)} kcal/Tag</span></td>
+      <td class="r"><span class="tstat ${cls}">${dirTxt}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------- Meilensteine ---------- */
+function renderWMilestones(m){
+  const strip = document.getElementById('w-msstrip'), body = document.getElementById('w-ms'), meta = document.getElementById('w-ms-meta');
+  if (m.goal == null || m.start == null || !m.last || m.goal === m.start){
+    strip.innerHTML = ''; meta.textContent = '–';
+    body.innerHTML = '<tr><td colspan="4" class="empty">Setze in den Einstellungen ein Zielgewicht — dann wird der Weg in Etappen zerlegt.</td></tr>';
+    return;
+  }
+  const list = wMilestones(m.start, m.goal, wSet.step);
+  let prev = m.start, nextSeen = false, done = 0, sHtml = '';
+  const rows = list.map((v, i) => {
+    const isGoal = i === list.length - 1, hit = wReachedAt(m, v);
+    let status, cls = '', dist = '';
+    if (hit){
+      done++; status = 'erreicht ' + ddmm(hit.date); cls = 'pos';
+      sHtml += `<span class="done" title="${wf1(v)} kg · erreicht"></span>`;
+    } else {
+      const pr = wPredict(m, v), eta = pr.state === 'eta' ? ddmm(wTToIso(pr.t)) : null;
+      dist = 'noch ' + wf1(Math.abs(v - m.last.trend)) + ' kg';
+      if (!nextSeen){
+        nextSeen = true;
+        const part = Math.max(0, Math.min(1, (m.last.trend - prev) / (v - prev)));
+        sHtml += `<span class="part" style="--p:${(part * 100).toFixed(1)}%" title="${wf1(v)} kg · nächste Etappe"></span>`;
+        status = eta ? 'nächste · ' + eta : 'nächste'; cls = '';
+      } else {
+        sHtml += `<span title="${wf1(v)} kg"></span>`;
+        status = eta ? 'Prognose ' + eta : 'offen'; cls = 'zeroc';
+      }
+    }
+    prev = v;
+    return `<tr>
+      <td><span class="tperiod">${isGoal ? 'ZIEL' : String(i + 1).padStart(2, '0')}</span></td>
+      <td><span class="tval">${wf1(v)} kg</span></td>
+      <td class="hide-s"><span class="tfat">${dist}</span></td>
+      <td class="r"><span class="tstat ${cls}">${status}</span></td>
+    </tr>`;
+  });
+  strip.innerHTML = sHtml;
+  body.innerHTML = rows.join('');
+  meta.textContent = `${done} von ${list.length} Etappen · alle ${String(wSet.step).replace('.', ',')} kg`;
+}
+
+/* ---------- Abgleich mit dem Defizit-Log ---------- */
+function wCheck(m, N){
+  const a = wTrendAt(m.pts, m.last.t - N); if (a == null) return null;
+  const fromIso = wTToIso(m.last.t - N), toIso = m.last.date;
+  const logs = data.filter(e => e.date > fromIso && e.date <= toIso);   // Defizit-Einträge (Seite 1)
+  if (!logs.length) return { N, n: 0, cov: 0 };
+  const avg = logs.reduce((s, e) => s + (e.targetBurn - e.consumed), 0) / logs.length;
+  const burn = logs.reduce((s, e) => s + e.targetBurn, 0) / logs.length;
+  const expected = avg * N / KCAL_PER_KG;    // kg Abnahme laut Log (Ø-Tag × Zeitraum)
+  const actual = a - m.last.trend;           // kg Abnahme laut Trend
+  return { N, n: logs.length, cov: logs.length / N, avg, burn, expected, actual, gap: (expected - actual) * KCAL_PER_KG / N };
+}
+
+function renderWCheck(m){
+  const body = document.getElementById('w-check'), note = document.getElementById('w-check-note');
+  if (!m.last || m.pts.length < 2){
+    body.innerHTML = '<tr><td colspan="5" class="empty">Braucht Gewichtsmessungen und Defizit-Einträge im selben Zeitraum.</td></tr>';
+    note.innerHTML = 'Hier wird geprüft, ob die Waage bestätigt, was dein Kalorien-Log verspricht — und wie weit dein Garmin-Verbrauch danebenliegt.';
+    return;
+  }
+  const res = [14, 30, 60, 90].map(N => wCheck(m, N)).filter(Boolean);
+  if (!res.length){
+    body.innerHTML = '<tr><td colspan="5" class="empty">Der Gewichtsverlauf ist noch kürzer als 14 Tage.</td></tr>';
+    note.innerHTML = 'Sobald 14 Tage Gewichtsverlauf vorliegen, erscheint hier der Abgleich mit deinem Kalorien-Log.';
+    return;
+  }
+  body.innerHTML = res.map(r => {
+    if (r.cov < 0.5){
+      return `<tr><td><span class="tperiod">${r.N} T</span></td><td><span class="tval zeroc">–</span><div class="tfat">${r.n}/${r.N} Tage geloggt</div></td><td class="hide-s"></td><td class="hide-s"></td><td class="r"><span class="tfat">zu wenig Log-Tage</span></td></tr>`;
+    }
+    const ok = Math.abs(r.gap) < 100, cls = ok ? 'pos' : r.gap > 0 ? 'neg' : 'zeroc';
+    const verdict = ok ? 'passt' : r.gap > 0 ? 'Log zu optimistisch' : 'Log zu vorsichtig';
+    return `<tr>
+      <td><span class="tperiod">${r.N} T</span></td>
+      <td><span class="tval ${signClass(r.avg)}">${statText(Math.round(r.avg))}</span><div class="tfat">${r.n}/${r.N} Tage geloggt</div></td>
+      <td class="hide-s"><span class="tfat">${wkg(-r.expected)} kg</span></td>
+      <td class="hide-s"><span class="tfat">${wkg(-r.actual)} kg</span></td>
+      <td class="r"><span class="tval ${cls}">${nf.format(Math.round(Math.abs(r.gap)))} kcal</span><div class="tfat">${verdict}</div></td>
+    </tr>`;
+  }).join('');
+
+  const pick = [30, 60, 14, 90].map(N => res.find(r => r.N === N)).find(r => r && r.cov >= 0.6);
+  if (!pick){
+    note.innerHTML = 'Für eine Aussage brauchst du in einem Zeitraum von 14+ Tagen an mindestens 60 % der Tage Defizit-Einträge auf Seite 1.';
+    return;
+  }
+  const X = nf.format(Math.round(Math.abs(pick.gap) / 10) * 10);
+  const tail = ` <span style="color:var(--ink-3)">Wasser und Glykogen verzerren kurze Zeiträume — 30 Tage und mehr sind aussagekräftiger.</span>`;
+  if (Math.abs(pick.gap) < 100){
+    note.innerHTML = `<strong>Log und Waage passen zusammen.</strong> Über ${pick.N} Tage liegt die Abweichung unter 100 kcal/Tag — Essensangaben und Garmin-Verbrauch sind stimmig.` + tail;
+  } else if (pick.gap > 0){
+    note.innerHTML = `<strong>Die Waage zeigt ~${X} kcal/Tag weniger Defizit als dein Log.</strong> Über ${pick.N} Tage erwartet dein Log ${wf2(pick.expected)} kg Abnahme, der Trend zeigt ${wf2(pick.actual)} kg. Typische Ursachen: Garmin überschätzt den Verbrauch oder Portionen werden unterschätzt. Realistischer Verbrauch damit ≈ ${nf.format(Math.round((pick.burn - pick.gap) / 10) * 10)} kcal statt ${nf.format(Math.round(pick.burn))}.` + tail;
+  } else {
+    note.innerHTML = `<strong>Du verlierst ~${X} kcal/Tag mehr, als dein Log erwarten lässt.</strong> Über ${pick.N} Tage erwartet dein Log ${wf2(pick.expected)} kg Abnahme, der Trend zeigt ${wf2(pick.actual)} kg. Dein Verbrauch liegt vermutlich höher als von Garmin angegeben — eher ≈ ${nf.format(Math.round((pick.burn - pick.gap) / 10) * 10)} kcal.` + tail;
+  }
+}
+
+/* ---------- Messungen ---------- */
+function renderWEntries(m){
+  const body = document.getElementById('w-list');
+  document.getElementById('w-count').textContent = m.pts.length + (m.pts.length === 1 ? ' Messung' : ' Messungen');
+  if (!m.pts.length){ body.innerHTML = '<tr><td colspan="6" class="empty">Noch keine Messungen.</td></tr>'; return; }
+  body.innerHTML = m.pts.slice().reverse().map(p => {
+    const dev = p.y - p.trend;
+    return `<tr class="erow">
+      <td><span class="eodo">${ddmm(p.date)}</span></td>
+      <td class="hide-s"><span class="ewd">${wWd(p.date)}</span></td>
+      <td class="r"><span class="enum">${wf1(p.y)}</span></td>
+      <td class="r"><span class="ebal">${wf2(p.trend)}</span></td>
+      <td class="r"><span class="enum ${m.dir * dev > 0 ? 'pos' : 'neg'}">${wkg(dev, 1)}</span></td>
+      <td class="r"><button class="xbtn" data-wdate="${p.date}" title="Löschen">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button></td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('.xbtn').forEach(b => { b.onclick = ev => { ev.stopPropagation(); wDel(b.dataset.wdate); }; });
+}
+
+/* ---------- Einstellungen ---------- */
+function fillWSettings(m){
+  const put = (id, v) => { const el = document.getElementById(id); if (document.activeElement !== el) el.value = v; };
+  put('w-goal', wSet.goal != null ? String(wSet.goal).replace('.', ',') : '');
+  put('w-start', wSet.start != null ? String(wSet.start).replace('.', ',') : '');
+  put('w-height', wSet.height != null ? String(wSet.height) : '');
+  put('w-step', String(wSet.step));
+  put('w-method', wSet.method);
+  document.getElementById('w-start').placeholder = m.pts.length ? wf1(m.pts[0].trend) + ' (auto)' : 'auto';
+  document.getElementById('w-method-note').textContent = TREND_METHODS[wSet.method].note;
+  document.getElementById('w-fnote').textContent = TREND_METHODS[wSet.method].short;
+}
+
+function renderWeight(){
+  wData.sort((a, b) => b.date.localeCompare(a.date));
+  try { localStorage.setItem(W_KEY, JSON.stringify(wData)); } catch (e){}
+  const m = wModel(); wModelCache = m;
+  renderWTicker(m);
+  renderWHero(m);
+  renderWChart(m);
+  renderWChanges(m);
+  renderWMilestones(m);
+  renderWCheck(m);
+  renderWEntries(m);
+  fillWSettings(m);
+  const last = wData[0];
+  document.getElementById('w-in-kg').placeholder = last ? wf1(last.kg) : '84,5';
+}
+
+/* ---------- Eingabe & Aktionen ---------- */
+document.getElementById('w-form').onsubmit = e => {
+  e.preventDefault();
+  const date = document.getElementById('w-in-date').value;
+  const kg = wNum(document.getElementById('w-in-kg').value);
+  if (!date || kg == null || kg < 20 || kg > 400){ toast('Bitte ein Gewicht zwischen 20 und 400 kg'); return; }
+  wData = wData.filter(d => d.date !== date);
+  wData.push({ date, kg: Math.round(kg * 100) / 100 });
+  renderWeight();
+  document.getElementById('w-in-kg').value = '';
+  document.getElementById('w-in-date').value = getISO(new Date());
+  if (navigator.vibrate) navigator.vibrate(10);
+  const p = wModelCache.pts.find(q => q.date === date);
+  toast(`${wf1(kg)} kg gespeichert · Trend ${wf1(p.trend)} kg`);
+};
+
+function wDel(date){
+  showModal('Messung löschen', `Möchtest du die Messung vom ${ddmm(date)} wirklich löschen?`, 'Löschen',
+    () => { wData = wData.filter(d => d.date !== date); renderWeight(); toast('Messung gelöscht'); });
+}
+
+document.querySelectorAll('#w-range button').forEach(b => {
+  b.onclick = () => { wRange = b.dataset.r; try { localStorage.setItem('weight_range', wRange); } catch (e){} renderWChart(wModelCache); };
+});
+const wSvgEl = document.getElementById('w-svg');
+wSvgEl.addEventListener('pointermove', wHover);
+wSvgEl.addEventListener('pointerdown', wHover);
+wSvgEl.addEventListener('pointerleave', wHoverEnd);
+
+const wMethodSel = document.getElementById('w-method');
+wMethodSel.innerHTML = Object.entries(TREND_METHODS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
+['w-goal', 'w-start', 'w-height', 'w-step', 'w-method'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    wSet.goal = wNum(document.getElementById('w-goal').value);
+    wSet.start = wNum(document.getElementById('w-start').value);
+    wSet.height = wNum(document.getElementById('w-height').value);
+    wSet.step = wNum(document.getElementById('w-step').value) || 2;
+    wSet.method = TREND_METHODS[wMethodSel.value] ? wMethodSel.value : 'kalman';
+    try { localStorage.setItem(W_SET_KEY, JSON.stringify(wSet)); } catch (e){}
+    renderWeight();
+    toast('Einstellungen gespeichert');
+  });
+});
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go="settings"]'); if (!b) return;
+  document.getElementById('w-settings').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => document.getElementById('w-goal').focus({ preventScroll: true }), 450);
+});
+
+/* ---------- Backup & Import ---------- */
+document.getElementById('w-export').onclick = () => {
+  const payload = { app: 'defizit-tracker', type: 'weight', version: 1, exported: getISO(new Date()), weights: wData, settings: wSet };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `gewicht_backup_${getISO(new Date())}.json`;
+  a.click();
+  toast('Gewichts-Backup exportiert');
+};
+document.getElementById('w-import').onclick = () => document.getElementById('w-file').click();
+
+function wParseCSV(txt){
+  const out = [];
+  txt.split(/\r?\n/).forEach(line => {
+    let m = line.match(/(\d{4})-(\d{2})-(\d{2})/), iso = null, rest = '';
+    if (m){ iso = `${m[1]}-${m[2]}-${m[3]}`; rest = line.slice(m.index + m[0].length); }
+    else if ((m = line.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/))){ iso = `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; rest = line.slice(m.index + m[0].length); }
+    if (!iso) return;
+    rest = rest.replace(/T?\d{1,2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?/g, ' ');
+    const nums = [...rest.matchAll(/\d{2,3}(?:[.,]\d+)?/g)].map(x => parseFloat(x[0].replace(',', '.')));
+    const kg = nums.find(n => n >= 20 && n <= 400);
+    if (kg != null) out.push({ date: iso, kg });
+  });
+  return out;
+}
+
+document.getElementById('w-file').onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const txt = String(ev.target.result);
+      let rows, settings = null;
+      if (/^\s*[\[{]/.test(txt)){
+        const obj = JSON.parse(txt);
+        const arr = Array.isArray(obj) ? obj : obj.weights;
+        if (!Array.isArray(arr)) throw new Error('format');
+        rows = arr.map(i => ({ date: String(i.date || '').slice(0, 10), kg: Number(i.kg != null ? i.kg : i.weight) }));
+        if (!Array.isArray(obj) && obj.settings) settings = obj.settings;
+      } else rows = wParseCSV(txt);
+      // mehrere Werte am selben Tag: niedrigster zählt (wie Happy Scale)
+      const best = new Map();
+      rows.filter(r => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && isFinite(r.kg) && r.kg >= 20 && r.kg <= 400)
+          .forEach(r => { if (!best.has(r.date) || r.kg < best.get(r.date)) best.set(r.date, Math.round(r.kg * 100) / 100); });
+      if (!best.size) throw new Error('empty');
+      const map = new Map(wData.map(d => [d.date, d.kg]));
+      best.forEach((kg, date) => map.set(date, kg));
+      wData = [...map].map(([date, kg]) => ({ date, kg }));
+      if (settings){ wSet = Object.assign(wSet, settings); try { localStorage.setItem(W_SET_KEY, JSON.stringify(wSet)); } catch (err){} }
+      renderWeight();
+      toast(best.size + ' Messungen importiert');
+    } catch (err){
+      showModal('Import-Fehler', 'Die Datei konnte nicht gelesen werden. Erwartet wird ein Gewichts-Backup (JSON) oder eine CSV mit Datum und Gewicht in kg pro Zeile.', 'Verstanden', null, true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+/* ============================================================
+   SEITEN-ROUTING
+   ============================================================ */
+const PAGES = {
+  defizit: { title: 'Defizit Tracker', sub: '/ Kalorienbilanz' },
+  gewicht: { title: 'Gewicht · Defizit Tracker', sub: '/ Gewichtstrend' }
+};
+function showPage(p){
+  if (!PAGES[p]) p = 'defizit';
+  document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-' + p));
+  document.querySelectorAll('.pnav a').forEach(a => a.classList.toggle('on', a.dataset.p === p));
+  document.getElementById('ticker-def').hidden = p !== 'defizit';
+  document.getElementById('ticker-w').hidden = p !== 'gewicht';
+  document.getElementById('wm-sub').textContent = PAGES[p].sub;
+  document.title = PAGES[p].title;
+  try { localStorage.setItem('tracker_page', p); } catch (e){}
+  syncDock();
+  if (p === 'gewicht') renderWeight(); else update();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', () => showPage(location.hash.slice(1)));
+let wResizeT;
+window.addEventListener('resize', () => {
+  clearTimeout(wResizeT);
+  wResizeT = setTimeout(() => { if (document.getElementById('page-gewicht').classList.contains('active')) renderWChart(wModelCache || wModel()); }, 120);
+});
 
 /* ---------- Start ---------- */
 document.getElementById('in-date').value = getISO(new Date());
+document.getElementById('w-in-date').value = getISO(new Date());
 update();
+showPage(location.hash.slice(1) || localStorage.getItem('tracker_page') || 'defizit');
 </script>
 </body>
 </html>
